@@ -118,7 +118,10 @@ export function FinalDashboard() {
         <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
           <div className="vc-score-cluster">
             <p className="vc-score-label">Nota geral</p>
-            <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4 pontos</small></div>
+            <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}>
+              <div className="vc-score-value"><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><span>/ 4</span></div>
+              <small>Desempenho crítico</small>
+            </div>
           </div>
           <EvidenceWave />
           <p><span>72%</span> dos itens avaliados têm evidência disponível</p>
@@ -128,7 +131,7 @@ export function FinalDashboard() {
       <section className="vc-overview" aria-label="Resumo do diagnóstico">
         <div><span className="vc-metric">03</span><p><strong>Prioridades críticas</strong><span>Pedem resposta coordenada</span></p></div>
         <div><span className="vc-metric">2026</span><p><strong>Ano da avaliação</strong><span>Usada neste cenário</span></p></div>
-        <div className="vc-order-method"><Icon name="info"/><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Saiba mais</button></div>
+        <div className="vc-order-method"><p><strong>Como calculamos a ordem?</strong></p><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Saiba mais</button></div>
       </section>
 
       {methodOpen && (
@@ -152,7 +155,7 @@ export function FinalDashboard() {
           {finalPriorities.map((priority, index) => (
             <article className={`vc-priority is-${getScoreTone(priority.score)} ${index === 0 ? "is-featured" : ""}`} key={priority.position}>
               <div className="vc-priority-index"><span>{priority.position}</span></div>
-              <div className="vc-priority-main"><span className={`vc-pill is-${priority.tone}`}>{priority.level}</span><h3>{priority.component}</h3><p>{priority.reason}</p></div>
+              <div className="vc-priority-main"><div className="vc-priority-status"><span className="vc-priority-alert" aria-hidden="true">🔺</span><span className={`vc-pill is-${priority.tone}`}>{priority.level}</span></div><h3>{priority.component}</h3><p>{priority.reason}</p></div>
               <div className={`vc-priority-score is-${getScoreTone(priority.score)}`}><span>Nota</span><strong>{priority.score.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4</small></div>
               {priority.to ? <Link className="vc-round-link" to={priority.to} aria-label={`Ver detalhes de ${priority.component}`}><Icon name="arrow"/></Link> : <button className="vc-round-link" type="button" disabled aria-label={`${priority.component}: detalhe indisponível nesta demonstração`}><Icon name="arrow"/></button>}
             </article>
