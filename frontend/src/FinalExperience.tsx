@@ -60,7 +60,7 @@ const riskIndicators: RiskIndicator[] = [
   },
   {
     id: "solar",
-    shortLabel: "Energia solar",
+    shortLabel: "Acesso à energia",
     label: "Potencial de geração solar",
     source: "AdaptaBrasil MCTI · município",
     observations: [
