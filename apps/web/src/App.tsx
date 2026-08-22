@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { FinalDashboard, FinalLayout, FinalOmbudsman, FinalPriority, FinalTracking } from "./FinalExperience";
 
 type Step = "diagnostico" | "orientacao" | "acompanhamento" | "ouvidoria";
 
@@ -27,20 +28,15 @@ const priorities = [
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<FinalPlaceholder />} />
+      <Route element={<FinalLayout />}>
+        <Route path="/" element={<FinalDashboard />} />
+        <Route path="/prioridade/gestao-de-riscos" element={<FinalPriority />} />
+        <Route path="/acompanhamento" element={<FinalTracking />} />
+        <Route path="/ouvidoria" element={<FinalOmbudsman />} />
+      </Route>
       <Route path="/prototipo-baixa" element={<LowFidelityPrototype />} />
-      <Route path="*" element={<Navigate to="/prototipo-baixa" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  );
-}
-
-function FinalPlaceholder() {
-  return (
-    <main className="final-placeholder">
-      <p>Vozes do Cerrado</p>
-      <h1>A versão final será construída aqui.</h1>
-      <Link to="/prototipo-baixa">Abrir sandbox do protótipo de baixa</Link>
-    </main>
   );
 }
 
