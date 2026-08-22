@@ -280,11 +280,11 @@ function interpolateData(observations: RiskObservation[], targetYear: number) {
   };
 }
 
-function DfRiskMap() {
-  const [selectedId, setSelectedId] = useState("water");
+function DfRiskMap({ indicators = riskIndicators }: { indicators?: RiskIndicator[] }) {
+  const [selectedId, setSelectedId] = useState(indicators[0]?.id ?? "water");
   const [currentYear, setCurrentYear] = useState(2020);
   const [geoJson, setGeoJson] = useState<GeoJson | null>(null);
-  const indicator = riskIndicators.find((item) => item.id === selectedId) ?? riskIndicators[0];
+  const indicator = indicators.find((item) => item.id === selectedId) ?? indicators[0];
   
   const observation = useMemo(() => interpolateData(indicator.observations, currentYear), [indicator, currentYear]);
 
@@ -332,7 +332,7 @@ function DfRiskMap() {
   return (
     <div className="vc-real-map">
       <div className="vc-map-tabs" role="tablist" aria-label="Indicador climático">
-        {riskIndicators.map((item) => (
+        {indicators.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -398,6 +398,31 @@ function DfRiskMap() {
   );
 }
 
+const componentRiskMapping: Record<string, string[]> = {
+  "F1": ["energy", "biodiversity"],
+  "F2": ["energy", "biodiversity"],
+  "F3": ["energy", "biodiversity"],
+  "G6": ["health", "food", "water"],
+  "P2": ["water", "health", "food"],
+  "P3": ["water", "health", "food"],
+  "P4": ["biodiversity", "water", "health"],
+  "P5": ["biodiversity", "water", "health"]
+};
+
+function ExpandableText({ text, limit = 250 }: { text: string, limit?: number }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!text) return <p>O comentário deste item não está disponível publicamente.</p>;
+  if (text.length <= limit) return <p>{text}</p>;
+  return (
+    <p>
+      {expanded ? text : text.slice(0, limit) + '... '}
+      <button type="button" className="vc-text-link" onClick={() => setExpanded(!expanded)} style={{ background: "transparent", border: "none", color: "var(--deep-green)", fontWeight: 700, cursor: "pointer", textDecoration: "underline", padding: 0 }}>
+        {expanded ? "Ver menos" : "Ver mais"}
+      </button>
+    </p>
+  );
+}
+
 export function FinalPriority() {
   const { componentId = "F3" } = useParams();
   const { data, error, loading } = useDfAssessment();
@@ -405,6 +430,9 @@ export function FinalPriority() {
   const component = data.componentes.find((item) => item.componentIdentifier === componentId);
   if (!component || component.score === null) return <section className="vc-data-state is-error"><h2>Componente não encontrado</h2><Link to="/">Voltar ao diagnóstico</Link></section>;
   const assessedItems = component.items.filter((item) => item.normalizedScore !== null).sort((left, right) => (left.normalizedScore ?? 1) - (right.normalizedScore ?? 1));
+
+  const allowedRiskIds = componentRiskMapping[component.componentIdentifier] || ["water", "energy", "biodiversity"];
+  const activeRiskIndicators = riskIndicators.filter(r => allowedRiskIds.includes(r.id));
 
   return <>
     <section className="vc-detail-hero">
@@ -423,7 +451,7 @@ export function FinalPriority() {
     </section>
 
     <section className="vc-risk-section" aria-labelledby="mapa-title">
-      <DfRiskMap/>
+      <DfRiskMap indicators={activeRiskIndicators} />
       <div className="vc-risk-copy">
         <div className="vc-context-pill-wrap">
           <span className="vc-score-status is-critical">Contexto territorial real</span>
@@ -431,16 +459,15 @@ export function FinalPriority() {
         <h2 id="mapa-title">Riscos climáticos do DF</h2>
         <p className="vc-risk-lead">As projeções oficiais do AdaptaBrasil MCTI revelam um agravamento contínuo dos riscos climáticos no Distrito Federal até 2050. Sem medidas estruturantes de adaptação, o estresse hídrico e as ameaças territoriais atingem níveis críticos, tornando a ação pública preventiva cada vez mais urgente.</p>
         <ul>
-          {riskIndicators.slice(0, 3).map((indicator, index) => {
+          {activeRiskIndicators.slice(0, 3).map((indicator, index) => {
             const first = indicator.observations[0];
-            const mid = indicator.observations[1];
             const last = indicator.observations[indicator.observations.length - 1];
             return (
               <li key={indicator.id}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <div>
-                  <strong>{indicator.shortLabel}: {last.level}</strong>
-                  <p>{`${formatScore(first.value)} em ${first.year} → ${formatScore(mid.value)} em ${mid.year} → ${formatScore(last.value)} em ${last.year}`}</p>
+                  <strong>{indicator.shortLabel}</strong>
+                  <p>Risco <b>{first.level.toLowerCase()}</b> hoje. Projeção indica agravamento para nível <b>{last.level.toLowerCase()}</b> até 2050.</p>
                 </div>
               </li>
             );
@@ -452,7 +479,7 @@ export function FinalPriority() {
 
     <section className="vc-section vc-guidance" aria-label="Itens avaliados do componente">
       <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Evidências da avaliação</p><h2>Problemas registrados no Painel</h2></div><p>{component.calculation.evaluatedItems} de {component.calculation.totalItems} itens avaliados.</p></header>
-      <ol className="vc-real-evidence-list">{assessedItems.map((item) => <li key={item.assessmentItemId}><div className="vc-evidence-score"><span>{component.componentIdentifier}-{item.itemIdentifier}</span><strong>{formatScore((item.normalizedScore ?? 0) * 4)}</strong><small>de 4</small></div><div><p className="vc-kicker vc-kicker-dark">{item.scoreText}</p><h3>{item.itemName}</h3><p>{item.assessmentComment || "O comentário deste item não está disponível publicamente."}</p></div></li>)}</ol>
+      <ol className="vc-real-evidence-list">{assessedItems.map((item) => <li key={item.assessmentItemId}><div className="vc-evidence-score"><span>{component.componentIdentifier}-{item.itemIdentifier}</span><strong>{formatScore((item.normalizedScore ?? 0) * 4)}</strong><small>de 4</small></div><div><p className="vc-kicker vc-kicker-dark">{item.scoreText}</p><h3>{item.itemName}</h3><ExpandableText text={item.assessmentComment} limit={220} /></div></li>)}</ol>
     </section>
 
     <section className="vc-next-action"><div><p className="vc-kicker">Leitura responsável</p><h2>Nota institucional e risco territorial são fontes diferentes.</h2><p>A prioridade usa somente a menor nota do Painel ClimaBrasil, como definido para este recorte. Os indicadores do mapa contextualizam a urgência climática sem alterar a nota oficial.</p><Link to="/acompanhamento" className="vc-button vc-button-lime">Ver situação dos planos <Icon name="arrow"/></Link></div></section>
