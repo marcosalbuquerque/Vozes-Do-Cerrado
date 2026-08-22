@@ -1,0 +1,4 @@
+workfiles/
+tools/
+*.inspect.ndjson
+deliverables/presentations/*/

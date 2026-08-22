@@ -60,7 +60,7 @@ No MVP, não há painel exclusivo com login para auditores. Contudo, a arquitetu
 
 ### 4.1 Stack de Tecnologia
 
-* **Linguagem & Monorepo:** TypeScript (modo estrito) via `pnpm workspaces`.
+* **Linguagem e organização:** TypeScript em modo estrito, com frontend e backend independentes.
 * **Frontend (`frontend`):** React, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS, Radix UI, MapLibre GL JS (mapas) e Recharts (gráficos).
 * **Backend (`backend`):** Node.js LTS, Express, contratos Zod/OpenAPI, Prisma ORM e PostgreSQL.
 * **Processamento Assíncrono (`backend/worker`):** BullMQ e Redis para ingestão de dados, tarefas de IA e processamento de arquivos.
