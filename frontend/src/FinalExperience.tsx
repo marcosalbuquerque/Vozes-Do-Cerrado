@@ -43,11 +43,6 @@ function Icon({ name }: { name: IconName }) {
   return <svg className="vc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-function EvidenceWave({ compact = false }: { compact?: boolean }) {
-  const bars = [26, 46, 31, 68, 43, 82, 57, 91, 73, 100, 66, 88];
-  return <div className={`vc-wave ${compact ? "is-compact" : ""}`} aria-hidden="true">{bars.map((height, index) => <i key={index} style={{ "--bar": `${height}%`, "--delay": `${index * 45}ms` } as React.CSSProperties} />)}</div>;
-}
-
 function DataState({ error, loading }: { error: string | null; loading: boolean }) {
   if (loading) return <section className="vc-data-state" aria-live="polite"><span className="vc-data-spinner"/><h2>Calculando as notas do DF</h2><p>A avaliação de 2025 está sendo processada diretamente da base do Painel ClimaBrasil.</p></section>;
   if (error) return <section className="vc-data-state is-error" role="alert"><h2>Dados indisponíveis</h2><p>{error} Verifique se a API está ativa e tente novamente.</p></section>;
@@ -107,13 +102,12 @@ export function FinalDashboard() {
       <section className="vc-hero">
         <div className="vc-hero-copy">
           <p className="vc-kicker">Painel ClimaBrasil · avaliação 2025</p>
+          <div className="vc-filter-row"><label htmlFor="state-select">Território analisado</label><div className="vc-state-select"><select id="state-select" defaultValue="DF"><option value="DF">Distrito Federal</option></select><Icon name="chevron"/></div><a href="#prioridades" className="vc-button vc-button-lime">Ver critérios <Icon name="arrow"/></a></div>
           <h1>Onde o DF precisa agir <em>primeiro?</em></h1>
           <p className="vc-lead">As prioridades abaixo vêm diretamente da avaliação oficial. A menor nota aparece primeiro.</p>
-          <div className="vc-filter-row"><label htmlFor="state-select">Território analisado</label><div className="vc-state-select"><select id="state-select" defaultValue="DF"><option value="DF">Distrito Federal</option></select><Icon name="chevron"/></div><a href="#prioridades" className="vc-button vc-button-lime">Ver critérios <Icon name="arrow"/></a></div>
         </div>
         <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
           <div className="vc-score-cluster"><p className={`vc-score-status is-${getScoreTone(overallScore)}`}>{getScoreStatus(overallScore)}</p><div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><span>Média dos componentes</span><strong>{formatScore(overallScore)}</strong><small>de 4 pontos</small></div></div>
-          <EvidenceWave />
           <p><span>{evidenceCoverage}%</span> dos {evaluatedItems.length} itens avaliados têm comentário público</p>
         </div>
       </section>
@@ -127,7 +121,7 @@ export function FinalDashboard() {
       {methodOpen && <div className="vc-method-layer"><button className="vc-method-backdrop" type="button" aria-label="Fechar explicação" onClick={() => setMethodOpen(false)} /><aside className="vc-method-panel" role="dialog" aria-modal="true" aria-labelledby="method-title"><button className="vc-method-close" type="button" onClick={() => setMethodOpen(false)} autoFocus aria-label="Fechar">×</button><p className="vc-kicker vc-kicker-dark">Metodologia verificável</p><h2 id="method-title">A menor nota vem primeiro</h2><p>Cada classificação do Painel ClimaBrasil é convertida para a escala de 0 a 4. A nota do componente é a média aritmética dos itens avaliados. Componentes com nota abaixo de 2,00 entram na lista crítica e são ordenados do menor para o maior.</p><p>Itens “Não avaliados” não viram zero. Se um componente contém essa classificação, ele fica fora da priorização até que a avaliação seja concluída.</p></aside></div>}
 
       <section className="vc-section vc-priorities" id="prioridades">
-        <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Distrito Federal</p><h2>Critérios de priorização</h2></div><p>{priorities.length} componentes abaixo de 2,00, ordenados da menor para a maior nota.</p></header>
+        <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Distrito Federal</p><h2>Critérios de priorização</h2></div></header>
         <div className="vc-priority-list">
           {priorities.map((priority, index) => <article className={`vc-priority is-${getScoreTone(priority.score ?? 0)} ${index === 0 ? "is-featured" : ""}`} key={priority.componentIdentifier}>
             <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Menor nota"><b aria-hidden="true">!</b></span> : <span>{String(index + 1).padStart(2, "0")}</span>}</div>
@@ -202,7 +196,7 @@ export function FinalPriority() {
       <ol className="vc-real-evidence-list">{assessedItems.map((item) => <li key={item.assessmentItemId}><div className="vc-evidence-score"><span>{component.componentIdentifier}-{item.itemIdentifier}</span><strong>{formatScore((item.normalizedScore ?? 0) * 4)}</strong><small>de 4</small></div><div><p className="vc-kicker vc-kicker-dark">{item.scoreText}</p><h3>{item.itemName}</h3><p>{item.assessmentComment || "O comentário deste item não está disponível publicamente."}</p></div></li>)}</ol>
     </section>
 
-    <section className="vc-next-action"><div><p className="vc-kicker">Leitura responsável</p><h2>Nota institucional e risco territorial são fontes diferentes.</h2><p>A prioridade usa somente a menor nota do Painel ClimaBrasil, como definido para este recorte. Os indicadores do mapa contextualizam a urgência climática sem alterar a nota oficial.</p><Link to="/acompanhamento" className="vc-button vc-button-lime">Ver situação dos planos <Icon name="arrow"/></Link></div><EvidenceWave compact /></section>
+    <section className="vc-next-action"><div><p className="vc-kicker">Leitura responsável</p><h2>Nota institucional e risco territorial são fontes diferentes.</h2><p>A prioridade usa somente a menor nota do Painel ClimaBrasil, como definido para este recorte. Os indicadores do mapa contextualizam a urgência climática sem alterar a nota oficial.</p><Link to="/acompanhamento" className="vc-button vc-button-lime">Ver situação dos planos <Icon name="arrow"/></Link></div></section>
   </>;
 }
 
