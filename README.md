@@ -18,4 +18,4 @@ pnpm dev
 
 O frontend estará disponível em `http://localhost:5173/prototipo-baixa`.
 
-No Railway, o Railpack executa `pnpm build` e inicia a SPA com `pnpm start`, respeitando a variável `PORT` fornecida pela plataforma. O comando existe tanto na raiz quanto em `apps/web`, permitindo deploy pela raiz do monorepo ou com `apps/web` configurado como Root Directory.
+No Railway, o Railpack executa `pnpm build` e inicia a SPA com `pnpm start`, respeitando a variável `PORT` fornecida pela plataforma. `start`, `railpack.json` e `index.js` existem tanto na raiz quanto em `apps/web`, permitindo deploy pela raiz do monorepo ou com `apps/web` configurado como Root Directory.
