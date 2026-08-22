@@ -131,6 +131,49 @@ export function FinalLayout() {
   );
 }
 
+const prioritizationCriteria = [
+  {
+    num: 1,
+    title: "Efetividade climática",
+    desc: "Avalia em que medida a medida contribui efetivamente para enfrentar a mudança do clima, seja por meio da redução de riscos, vulnerabilidades e impactos climáticos, da redução de emissões de gases de efeito estufa, do aumento de remoções ou da combinação desses resultados.",
+  },
+  {
+    num: 2,
+    title: "Factibilidade política, institucional, técnica, cultural e econômica",
+    desc: "Avalia as condições necessárias para implementação da medida, considerando viabilidade política, capacidade institucional e técnica, aceitação social e cultural, competências legais, disponibilidade de recursos financeiros e capacidade de execução.",
+  },
+  {
+    num: 3,
+    title: "Equidade e justiça climática",
+    desc: "Avalia em que medida a medida distribui de forma justa seus benefícios, custos e riscos, considerando grupos sociais em situação de maior vulnerabilidade, desigualdades socioeconômicas, gênero, raça, idade, território e direitos humanos.",
+  },
+  {
+    num: 4,
+    title: "Cobenefícios e contribuição para o desenvolvimento sustentável",
+    desc: "Avalia os benefícios adicionais gerados pela medida além de seu objetivo climático principal, considerando aspectos sociais, econômicos, ambientais e de desenvolvimento sustentável, como saúde, biodiversidade, segurança alimentar e hídrica, geração de renda, emprego e qualidade ambiental.",
+  },
+  {
+    num: 5,
+    title: "Externalidades negativas e risco de impactos adversos",
+    desc: "Avalia potenciais consequências negativas, intencionais ou não, decorrentes da implementação da medida, incluindo impactos sociais, econômicos e ambientais, bem como riscos de maladaptação, aumento de vulnerabilidades, desigualdades ou emissões.",
+  },
+  {
+    num: 6,
+    title: "Potencial de transformação",
+    desc: "Avalia a capacidade da medida de promover mudanças estruturais e duradouras nas condições que contribuem para a vulnerabilidade climática e/ou para as emissões de gases de efeito estufa, indo além de respostas pontuais ou incrementais.",
+  },
+  {
+    num: 7,
+    title: "Coerência e integração com políticas públicas",
+    desc: "Avalia a compatibilidade e a contribuição da medida para outras políticas, planos, programas e estratégias governamentais, considerando sua integração entre setores, escalas territoriais e agendas de adaptação, mitigação e desenvolvimento sustentável.",
+  },
+  {
+    num: 8,
+    title: "Durabilidade, flexibilidade e adequação futura",
+    desc: "Avalia a capacidade da medida de produzir benefícios duradouros, permanecer adequada diante de mudanças nas condições climáticas, socioeconômicas e tecnológicas e ser ajustada ao longo do tempo conforme novos riscos, conhecimentos e cenários se apresentem.",
+  },
+];
+
 export function FinalDashboard() {
   const [methodOpen, setMethodOpen] = useState(false);
   const { data, error, loading } = useDfAssessment();
@@ -168,10 +211,31 @@ export function FinalDashboard() {
       <section className="vc-overview" aria-label="Resumo do diagnóstico">
         <div><span className="vc-metric">{String(priorities.length).padStart(2, "0")}</span><p><strong>Componentes críticos</strong><span>Nota abaixo de 2,00</span></p></div>
         <div><span className="vc-metric">2025</span><p><strong>Ano da avaliação</strong><span>{calculable.length} componentes calculáveis</span></p></div>
-        <div className="vc-order-method"><p><strong>Como calculamos a ordem?</strong></p><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Ver metodologia</button></div>
+        <div className="vc-order-method"><p><strong>Como calculamos a ordem?</strong></p><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Ver critérios</button></div>
       </section>
 
-      {methodOpen && <div className="vc-method-layer"><button className="vc-method-backdrop" type="button" aria-label="Fechar explicação" onClick={() => setMethodOpen(false)} /><aside className="vc-method-panel" role="dialog" aria-modal="true" aria-labelledby="method-title"><button className="vc-method-close" type="button" onClick={() => setMethodOpen(false)} autoFocus aria-label="Fechar">×</button><p className="vc-kicker vc-kicker-dark">Metodologia verificável</p><h2 id="method-title">A menor nota vem primeiro</h2><p>Cada classificação do Painel ClimaBrasil é convertida para a escala de 0 a 4. A nota do componente é a média aritmética dos itens avaliados. Componentes com nota abaixo de 2,00 entram na lista crítica e são ordenados do menor para o maior.</p><p>Itens “Não avaliados” não viram zero. Se um componente contém essa classificação, ele fica fora da priorização até que a avaliação seja concluída.</p></aside></div>}
+      {methodOpen && (
+        <div className="vc-method-layer">
+          <button className="vc-method-backdrop" type="button" aria-label="Fechar explicação" onClick={() => setMethodOpen(false)} />
+          <aside className="vc-method-panel" role="dialog" aria-modal="true" aria-labelledby="method-title">
+            <button className="vc-method-close" type="button" onClick={() => setMethodOpen(false)} autoFocus aria-label="Fechar">×</button>
+            <p className="vc-kicker vc-kicker-dark">Critérios de Avaliação</p>
+            <h2 id="method-title">Critérios de priorização</h2>
+            <p className="vc-method-intro">A definição das prioridades e ações de enfrentamento climático baseia-se nos 8 critérios estruturantes de priorização:</p>
+            <div className="vc-method-criteria-list">
+              {prioritizationCriteria.map((item) => (
+                <div key={item.num} className="vc-method-criterion-card">
+                  <span className="vc-method-criterion-num">{item.num}</span>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+      )}
 
       <section className="vc-section vc-priorities" id="prioridades">
         <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Distrito Federal</p><h2>Critérios de priorização</h2></div></header>
