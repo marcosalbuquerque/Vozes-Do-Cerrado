@@ -462,13 +462,190 @@ export function FinalPriority() {
   </>;
 }
 
+type BenchmarkItem = {
+  id: string;
+  componentCode: string;
+  componentName: string;
+  dfScore: number;
+  dfStatus: string;
+  benchmarkState: string;
+  benchmarkScore: number;
+  auditHighlight: string;
+  nextSteps: string[];
+};
+
+const benchmarksData: BenchmarkItem[] = [
+  {
+    id: "justica-climatica",
+    componentCode: "G6",
+    componentName: "Justiça climática e salvaguardas sociais",
+    dfScore: 1.33,
+    dfStatus: "Estágio crítico",
+    benchmarkState: "Salvador (BA)",
+    benchmarkScore: 4.00,
+    auditHighlight: "A liderança da agenda climática em Salvador está em estágio avançado pela SECIS (Secretaria Municipal de Sustentabilidade, Inovação e Resiliência), com posição hierárquica e autoridade para mobilizar setores, canal direto com o Executivo, composição mista técnica/política e salvaguardas para populações vulneráveis integradas ao Plano de Ação Climática (PLAC).",
+    nextSteps: [
+      "Instituir o Comitê Distrital de Justiça Climática com participação de comunidades periféricas e vulneráveis do DF.",
+      "Integrar mapeamento de vulnerabilidade climática e salvaguardas socioambientais nas 35 Regiões Administrativas.",
+      "Estabelecer canal direto de reporte ao Governador para coordenação intersetorial e priorização de recursos nas áreas de risco.",
+    ],
+  },
+  {
+    id: "investimentos-privados",
+    componentCode: "F3",
+    componentName: "Mobilização de investimentos privados e capital verde",
+    dfScore: 0.00,
+    dfStatus: "Sem progresso",
+    benchmarkState: "Alagoas / Minas Gerais",
+    benchmarkScore: 4.00,
+    auditHighlight: "Estruturação de instrumentos econômicos de transição justa, editais de atração de capital privado, parcerias público-privadas (PPPs) em energias renováveis e saneamento, e linhas de crédito com contrapartidas de descarbonização e resiliência hídrica.",
+    nextSteps: [
+      "Regulamentar o Fundo Distrital de Mudança do Clima com mecanismos de cofinanciamento privado e emissão de Green Bonds.",
+      "Lançar editais de PPPs e incentivos fiscais para eficiência hídrica e geração solar comunitária nas áreas rurais e urbanas do DF.",
+      "Estabelecer critérios socioambientais obrigatórios nas contratações e compras públicas do Governo do Distrito Federal.",
+    ],
+  },
+  {
+    id: "estrategias-adaptacao",
+    componentCode: "P2",
+    componentName: "Estratégias e planos de adaptação climática",
+    dfScore: 1.33,
+    dfStatus: "Estágio crítico",
+    benchmarkState: "Recife (PE) / Acre",
+    benchmarkScore: 4.00,
+    auditHighlight: "Recife aprovou o PLAC com análise de riscos e vulnerabilidades e implantou Dashboard online em tempo real. O Acre instituiu o Plano de Adaptação por Lei Estadual (Lei nº 3.880/2021) com departamento permanente de monitoramento e sistema hidrometeorológico contínuo (Plano MEL).",
+    nextSteps: [
+      "Elaborar e aprovar por Lei Distrital o Plano de Ação e Adaptação Climática do Distrito Federal.",
+      "Definir metas setoriais quantitativas para enfrentamento do estresse hídrico e segurança alimentar até 2030 e 2050.",
+      "Disponibilizar painel público com indicadores em tempo real para transparência ativa e auditoria social.",
+    ],
+  },
+  {
+    id: "estrutura-governanca",
+    componentCode: "G2",
+    componentName: "Estrutura governamental e governança intersetorial",
+    dfScore: 1.33,
+    dfStatus: "Estágio crítico",
+    benchmarkState: "Bahia / São Paulo",
+    benchmarkScore: 4.00,
+    auditHighlight: "Reorganização do Comitê Gestor da Política Estadual de Mudanças Climáticas (Decreto Regulamentador) com atribuições claras sem sobreposições ou lacunas entre órgãos, equipe técnica multidisciplinar dedicada e atas e agendas de reuniões públicas.",
+    nextSteps: [
+      "Reativar o Fórum Distrital de Mudança do Clima com calendário público e reuniões periódicas.",
+      "Definir matriz formal de competências sem lacunas entre IBRAM, SEMA, ADASA, Defesa Civil e Terracap.",
+      "Capacitar o corpo técnico das administrações regionais para implementação descentralizada das ações climáticas.",
+    ],
+  },
+];
+
 export function FinalTracking() {
   const { data, error, loading } = useDfAssessment();
+  const [selectedBenchmarkId, setSelectedBenchmarkId] = useState<string>("justica-climatica");
+
   if (!data) return <DataState error={error} loading={loading} />;
-  return <>
-    <section className="vc-page-intro"><div><p className="vc-kicker vc-kicker-dark">Acompanhamento público</p><h1>O acompanhamento ainda não começou</h1><p>Ainda não há ações, responsáveis, prazos ou entregas registradas para o Distrito Federal.</p></div></section>
-    <section className="vc-support-band"><div><Icon name="message"/><span><strong>Tem uma fonte oficial para os planos?</strong>Envie a referência para análise e integração.</span></div><Link to="/ouvidoria" className="vc-button vc-button-dark">Falar com a Ouvidoria <Icon name="arrow"/></Link></section>
-  </>;
+
+  const activeBenchmark = benchmarksData.find((b) => b.id === selectedBenchmarkId) ?? benchmarksData[0];
+
+  return (
+    <>
+      <section className="vc-page-intro">
+        <div>
+          <p className="vc-kicker vc-kicker-dark">Benchmarking Federativo · Próximos Passos</p>
+          <h1>O que o DF pode aprender com os estados líderes</h1>
+          <p>
+            Analisamos os relatórios de auditoria do Painel ClimaBrasil para identificar o que deu certo nos estados com as maiores notas e traçar os próximos passos estratégicos para o Distrito Federal.
+          </p>
+        </div>
+        <div className="vc-readonly-seal">
+          <Icon name="shield" />
+          <div>
+            <span>Fonte de Referência</span>
+            <strong>Auditorias TCU / TCEs 2025</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="vc-tracking-section">
+        <div className="vc-benchmark-tabs" role="tablist" aria-label="Áreas de benchmark">
+          {benchmarksData.map((b) => (
+            <button
+              key={b.id}
+              type="button"
+              role="tab"
+              aria-selected={b.id === activeBenchmark.id}
+              onClick={() => setSelectedBenchmarkId(b.id)}
+            >
+              <span>{b.componentCode}</span>
+              <strong>{b.componentName}</strong>
+            </button>
+          ))}
+        </div>
+
+        <div className="vc-benchmark-showcase">
+          <div className="vc-benchmark-header">
+            <div>
+              <div className="vc-context-pill-wrap">
+                <span className="vc-score-status is-critical">{activeBenchmark.dfStatus}</span>
+              </div>
+              <h2>{activeBenchmark.componentName} ({activeBenchmark.componentCode})</h2>
+            </div>
+            <div className="vc-benchmark-comparison-badge">
+              <div className="vc-score-comparison-item is-df">
+                <small>Distrito Federal</small>
+                <strong>{formatScore(activeBenchmark.dfScore)}</strong>
+                <span>de 4,00</span>
+              </div>
+              <div className="vc-score-comparison-arrow">→</div>
+              <div className="vc-score-comparison-item is-benchmark">
+                <small>Referência: {activeBenchmark.benchmarkState}</small>
+                <strong>{formatScore(activeBenchmark.benchmarkScore)}</strong>
+                <span>de 4,00</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="vc-benchmark-content-grid">
+            <div className="vc-benchmark-audit-box">
+              <p className="vc-kicker vc-kicker-dark">Evidência registrada pelos auditores no Painel</p>
+              <h3>O que deu certo em {activeBenchmark.benchmarkState}</h3>
+              <blockquote className="vc-audit-quote">
+                “{activeBenchmark.auditHighlight}”
+              </blockquote>
+              <div className="vc-audit-source-tag">
+                <Icon name="info" />
+                <span>Registro oficial auditado · Versão de Avaliação 2025</span>
+              </div>
+            </div>
+
+            <div className="vc-benchmark-actions-box">
+              <p className="vc-kicker vc-kicker-dark">Roteiro de ação pública</p>
+              <h3>Próximos passos recomendados para o DF</h3>
+              <ol className="vc-next-steps-list">
+                {activeBenchmark.nextSteps.map((step, index) => (
+                  <li key={index}>
+                    <span className="vc-step-number">{String(index + 1).padStart(2, "0")}</span>
+                    <p>{step}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="vc-support-band">
+        <div>
+          <Icon name="message" />
+          <span>
+            <strong>Tem propostas ou documentos de planos para o DF?</strong>
+            Envie sua manifestação ou contribuição diretamente para a Ouvidoria.
+          </span>
+        </div>
+        <Link to="/ouvidoria" className="vc-button vc-button-dark">
+          Falar com a Ouvidoria <Icon name="arrow" />
+        </Link>
+      </section>
+    </>
+  );
 }
 
 export function FinalOmbudsman() {
