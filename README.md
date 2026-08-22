@@ -7,7 +7,7 @@ Consulte o [plano de desenvolvimento](./docs/plan.md) para conhecer o escopo de 
 ## Organização do projeto
 
 - `frontend/`: aplicação ativa Vozes do Cerrado, publicada no Railway.
-- `backend/`: espaço reservado para a futura API e os serviços de IA.
+- `backend/`: API do piloto do Distrito Federal e comparação assistida por IA.
 - `docs/`: plano, design system, referências e entregáveis do projeto.
 
 ## Rotas disponíveis
@@ -25,3 +25,5 @@ pnpm dev
 O frontend estará disponível em `http://localhost:5173/prototipo-baixa`.
 
 No Railway, o deploy continua partindo da raiz do repositório. O `Dockerfile.web` constrói `frontend/` e publica a SPA com Caddy, preservando a rota de saúde `/health`. Os comandos `pnpm build` e `pnpm start` também continuam disponíveis na raiz.
+
+O backend possui configuração separada em `railway.backend.toml` e não altera o serviço atual do frontend. Consulte [`backend/README.md`](./backend/README.md) para configurar a chave da OpenAI e testar a rota de priorização.
