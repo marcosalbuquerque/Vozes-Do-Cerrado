@@ -1,12 +1,16 @@
 import "dotenv/config";
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
-import { createOpenAIPriorityAnalyzer } from "./prioritization.js";
+import { createGeminiPriorityAnalyzer } from "./prioritization.js";
 
 const config = loadConfig();
-const analyzer = createOpenAIPriorityAnalyzer(config);
+const analyzer = createGeminiPriorityAnalyzer(config);
 const app = createApp(config, analyzer);
 
-app.listen(config.PORT, "0.0.0.0", () => {
-  console.log(`API Vozes do Cerrado disponível na porta ${config.PORT}.`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(config.PORT, "0.0.0.0", () => {
+    console.log(`API Vozes do Cerrado disponível na porta ${config.PORT}.`);
+  });
+}
+
+export default app;

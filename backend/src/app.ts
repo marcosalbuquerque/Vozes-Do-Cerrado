@@ -161,7 +161,7 @@ export function createApp(
       return;
     }
 
-    if (error instanceof Error && error.message === "OPENAI_API_KEY_NOT_CONFIGURED") {
+    if (error instanceof Error && error.message === "GEMINI_API_KEY_NOT_CONFIGURED") {
       response.status(503).json({
         error: "A análise por IA ainda não foi configurada no servidor.",
       });

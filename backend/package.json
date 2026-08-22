@@ -12,6 +12,7 @@
     "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.18.0",
     "cors": "latest",
     "csv-parse": "latest",
     "dotenv": "latest",
@@ -19,7 +20,8 @@
     "express-rate-limit": "latest",
     "helmet": "latest",
     "openai": "latest",
-    "zod": "latest"
+    "zod": "latest",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@types/cors": "latest",
