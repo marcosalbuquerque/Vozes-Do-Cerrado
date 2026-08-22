@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 
-type Step = "diagnostico" | "orientacao" | "plano" | "salvo";
+type Step = "diagnostico" | "orientacao" | "acompanhamento" | "ouvidoria";
 
 const priorities = [
   {
@@ -54,21 +54,30 @@ function LowFidelityPrototype() {
       </div>
 
       <header className="prototype-header">
-        <div>
+        <div className="brand-block">
           <span className="sketch-logo" aria-hidden="true">VC</span>
           <div>
             <strong>Vozes do Cerrado</strong>
             <small>Protótipo de baixa fidelidade</small>
           </div>
         </div>
-        <label>
-          Estado analisado
-          <select defaultValue="GO">
-            <option value="GO">Goiás</option>
-            <option value="MT">Mato Grosso</option>
-            <option value="MS">Mato Grosso do Sul</option>
-          </select>
-        </label>
+        <div className="header-actions">
+          <button
+            className={`ombudsman-button ${step === "ouvidoria" ? "is-active" : ""}`}
+            onClick={() => setStep("ouvidoria")}
+            aria-pressed={step === "ouvidoria"}
+          >
+            Ouvidoria
+          </button>
+          <label>
+            Estado analisado
+            <select defaultValue="GO">
+              <option value="GO">Goiás</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+            </select>
+          </label>
+        </div>
       </header>
 
       <div className="prototype-grid">
@@ -76,18 +85,20 @@ function LowFidelityPrototype() {
           <p className="sidebar-label">Jornada do gestor</p>
           <StepButton number="1" label="Diagnóstico" active={step === "diagnostico"} onClick={() => setStep("diagnostico")} />
           <StepButton number="2" label="Orientação" active={step === "orientacao"} onClick={() => setStep("orientacao")} />
-          <StepButton number="3" label="Plano de ação" active={step === "plano" || step === "salvo"} onClick={() => setStep("plano")} />
+          <StepButton number="3" label="Acompanhamento" active={step === "acompanhamento"} onClick={() => setStep("acompanhamento")} />
           <div className="wire-note">
             <strong>Objetivo do teste</strong>
-            <p>O gestor consegue identificar uma prioridade e transformá-la em ação?</p>
+            <p>O gestor consegue identificar uma prioridade, entender o risco e acompanhar a ação publicada pelo TCU?</p>
           </div>
         </aside>
 
         <main className="prototype-main" id="conteudo">
           {step === "diagnostico" && <Diagnosis onContinue={() => setStep("orientacao")} />}
-          {step === "orientacao" && <Guidance onBack={() => setStep("diagnostico")} onContinue={() => setStep("plano")} />}
-          {step === "plano" && <ActionPlan onBack={() => setStep("orientacao")} onSave={() => setStep("salvo")} />}
-          {step === "salvo" && <SavedPlan onRestart={() => setStep("diagnostico")} />}
+          {step === "orientacao" && <Guidance onBack={() => setStep("diagnostico")} onContinue={() => setStep("acompanhamento")} />}
+          {step === "acompanhamento" && (
+            <PlanTracking onBack={() => setStep("orientacao")} onOpenOmbudsman={() => setStep("ouvidoria")} />
+          )}
+          {step === "ouvidoria" && <Ombudsman onBack={() => setStep("acompanhamento")} />}
         </main>
       </div>
     </div>
@@ -163,6 +174,25 @@ function Guidance({ onBack, onContinue }: { onBack: () => void; onContinue: () =
         <div className="score-box"><small>Nível atual</small><strong>1</strong><span>Inicial</span></div>
       </div>
 
+      <article className="risk-placeholder risk-first">
+        <div className="fake-map" aria-label="Espaço reservado para mapa de risco">
+          <span>MAPA DE RISCO</span>
+          <i className="map-area one" />
+          <i className="map-area two" />
+          <i className="map-area three" />
+        </div>
+        <div>
+          <p className="eyebrow">Riscos da inação</p>
+          <h2>Eventos extremos encontram uma resposta mais lenta</h2>
+          <ul>
+            <li>maior exposição da população;</li>
+            <li>perdas humanas e materiais;</li>
+            <li>mais recursos usados em resposta, menos em prevenção.</li>
+          </ul>
+          <small>[Fonte, período e metodologia entram aqui]</small>
+        </div>
+      </article>
+
       <div className="two-column">
         <article className="wire-panel">
           <span className="panel-index">A</span>
@@ -183,101 +213,141 @@ function Guidance({ onBack, onContinue }: { onBack: () => void; onContinue: () =
         </article>
       </div>
 
-      <article className="risk-placeholder">
-        <div className="fake-map" aria-label="Espaço reservado para mapa de risco">
-          <span>MAPA DE RISCO</span>
-          <i className="map-area one" />
-          <i className="map-area two" />
-          <i className="map-area three" />
-        </div>
-        <div>
-          <p className="eyebrow">Riscos da inação</p>
-          <h2>Eventos extremos encontram uma resposta mais lenta</h2>
-          <ul>
-            <li>maior exposição da população;</li>
-            <li>perdas humanas e materiais;</li>
-            <li>mais recursos usados em resposta, menos em prevenção.</li>
-          </ul>
-          <small>[Fonte, período e metodologia entram aqui]</small>
-        </div>
-      </article>
-
       <div className="prototype-callout">
         <strong>Próximo passo sugerido</strong>
         <p>Verificar o mapeamento existente, definir responsáveis e estabelecer uma rotina de monitoramento.</p>
-        <button className="primary-button" onClick={onContinue}>Transformar em plano de ação →</button>
+        <button className="primary-button" onClick={onContinue}>Acompanhar plano de ação →</button>
       </div>
     </section>
   );
 }
 
-function ActionPlan({ onBack, onSave }: { onBack: () => void; onSave: () => void }) {
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    onSave();
-  }
-
+function PlanTracking({ onBack, onOpenOmbudsman }: { onBack: () => void; onOpenOmbudsman: () => void }) {
   return (
     <section>
       <button className="back-button" onClick={onBack}>← Voltar à orientação</button>
       <div className="page-heading compact">
         <div>
-          <p className="eyebrow">Nova ação</p>
-          <h1>Organizar o primeiro avanço</h1>
-          <p>Adapte a sugestão ao contexto do estado antes de salvar.</p>
+          <p className="eyebrow">Acompanhamento</p>
+          <h1>Acompanhe o plano de ação</h1>
+          <p>Consulte o andamento, os responsáveis e as evidências publicadas.</p>
+        </div>
+        <div className="score-box"><small>Status atual</small><strong>2</strong><span>Em andamento</span></div>
+      </div>
+
+      <aside className="ownership-notice" aria-label="Responsabilidade pela atualização">
+        <span aria-hidden="true">i</span>
+        <div>
+          <strong>Atualização feita pelo TCU</strong>
+          <p>Esta plataforma é somente para acompanhamento. O plano, os prazos e as evidências são atualizados pelo TCU.</p>
+        </div>
+      </aside>
+
+      <div className="tracking-layout">
+        <article className="tracking-summary">
+          <p className="eyebrow">Ação acompanhada</p>
+          <h2>Atualizar o mapeamento estadual de áreas de risco</h2>
+          <dl className="tracking-details">
+            <div><dt>Ligada a</dt><dd>Gestão de riscos climáticos · prioridade #1</dd></div>
+            <div><dt>Responsável</dt><dd>[Órgão informado pelo TCU]</dd></div>
+            <div><dt>Prazo</dt><dd>[Data informada pelo TCU]</dd></div>
+            <div><dt>Última atualização</dt><dd>[Data e hora da publicação]</dd></div>
+          </dl>
+          <button className="text-button">Ver evidências publicadas</button>
+        </article>
+
+        <article className="tracking-progress" aria-labelledby="progress-title">
+          <p className="eyebrow">Andamento</p>
+          <h2 id="progress-title">Histórico do plano</h2>
+          <ol className="status-timeline">
+            <li className="is-complete"><span>✓</span><div><strong>Plano publicado</strong><small>Concluído</small></div></li>
+            <li className="is-current"><span>2</span><div><strong>Responsável designado</strong><small>Etapa atual</small></div></li>
+            <li><span>3</span><div><strong>Execução acompanhada</strong><small>Aguardando atualização</small></div></li>
+            <li><span>4</span><div><strong>Evidência final publicada</strong><small>Aguardando atualização</small></div></li>
+          </ol>
+        </article>
+      </div>
+
+      <div className="prototype-callout support-callout">
+        <div>
+          <strong>Precisa esclarecer ou contestar uma informação?</strong>
+          <p>A Ouvidoria recebe dúvidas, correções, reclamações e sugestões sobre os dados apresentados.</p>
+        </div>
+        <button className="primary-button" onClick={onOpenOmbudsman}>Falar com a Ouvidoria →</button>
+      </div>
+    </section>
+  );
+}
+
+function Ombudsman({ onBack }: { onBack: () => void }) {
+  const [sent, setSent] = useState(false);
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSent(true);
+  }
+
+  if (sent) {
+    return (
+      <section className="success-state">
+        <div className="success-mark">✓</div>
+        <p className="eyebrow">Ouvidoria</p>
+        <h1>Manifestação registrada no protótipo</h1>
+        <p>Nenhuma informação foi enviada. Esta etapa serve para validar o fluxo e a clareza do canal.</p>
+        <button className="primary-button" onClick={onBack}>Voltar ao acompanhamento</button>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <button className="back-button" onClick={onBack}>← Voltar ao acompanhamento</button>
+      <div className="page-heading compact">
+        <div>
+          <p className="eyebrow">Canal do cliente</p>
+          <h1>Fale com a Ouvidoria</h1>
+          <p>Envie dúvidas, pedidos de correção, reclamações ou sugestões sobre os dados e o acompanhamento.</p>
         </div>
       </div>
 
-      <form className="action-form" onSubmit={submit}>
-        <label className="full-field">
-          Ação
-          <input required defaultValue="Atualizar o mapeamento estadual de áreas de risco" />
+      <aside className="ownership-notice">
+        <span aria-hidden="true">!</span>
+        <div>
+          <strong>A Ouvidoria não altera o plano de ação</strong>
+          <p>As atualizações continuam sob responsabilidade do TCU. Este canal registra a manifestação do cliente.</p>
+        </div>
+      </aside>
+
+      <form className="ombudsman-form" onSubmit={submit}>
+        <label>
+          Tipo de manifestação
+          <select required defaultValue="">
+            <option value="" disabled>Selecione uma opção</option>
+            <option>Dúvida sobre os dados</option>
+            <option>Pedido de correção</option>
+            <option>Reclamação</option>
+            <option>Sugestão</option>
+          </select>
         </label>
         <label>
-          Responsável
-          <input required placeholder="Nome ou órgão" />
+          Assunto
+          <input required placeholder="Resuma o motivo do contato" />
         </label>
         <label>
-          Prazo
-          <input required type="date" />
+          Mensagem
+          <textarea required placeholder="Descreva o que aconteceu e qual informação precisa ser analisada" />
         </label>
-        <label>
-          Indicador
-          <input required defaultValue="Percentual do território mapeado" />
+        <label className="consent-field">
+          <input type="checkbox" required />
+          <span>Confirmo que revisei a mensagem e autorizo o registro desta manifestação.</span>
         </label>
-        <label>
-          Meta
-          <input required defaultValue="100% das áreas prioritárias" />
-        </label>
-        <label className="full-field">
-          Evidência esperada
-          <textarea required defaultValue="Mapa atualizado, ato de aprovação e relatório metodológico." />
-        </label>
-        <div className="form-footer full-field">
-          <p><strong>Ligada a:</strong> Gestão de riscos climáticos · prioridade #1</p>
-          <button className="primary-button" type="submit">Salvar plano de ação</button>
+        <div className="form-footer">
+          <small>Campos obrigatórios. O prazo de resposta será definido no serviço oficial.</small>
+          <button className="primary-button" type="submit">Registrar manifestação</button>
         </div>
       </form>
     </section>
   );
 }
 
-function SavedPlan({ onRestart }: { onRestart: () => void }) {
-  return (
-    <section className="success-state">
-      <div className="success-mark">✓</div>
-      <p className="eyebrow">Fluxo concluído</p>
-      <h1>Plano de ação salvo no protótipo</h1>
-      <p>Nesta sandbox, nada foi enviado para um banco de dados. O objetivo é validar se o fluxo faz sentido.</p>
-      <div className="saved-summary">
-        <span>Ação</span><strong>Atualizar o mapeamento estadual de áreas de risco</strong>
-        <span>Status</span><strong>Não iniciada</strong>
-        <span>Próxima etapa</span><strong>Definir responsável e validar com a equipe</strong>
-      </div>
-      <button className="primary-button" onClick={onRestart}>Testar novamente</button>
-    </section>
-  );
-}
-
 export default App;
-
