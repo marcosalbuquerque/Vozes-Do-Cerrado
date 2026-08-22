@@ -411,7 +411,7 @@ export function FinalPriority() {
       <div className="vc-detail-top"><Link to="/" className="vc-back">← Voltar ao diagnóstico</Link><span className="vc-detail-priority">{component.componentIdentifier} · nota {formatScore(component.score)}</span></div>
       <div className="vc-detail-title">
         <div>
-          <p className="vc-kicker">{component.axisName} · avaliação 2025</p>
+          <p className="vc-kicker vc-kicker-dark">{component.axisName} · avaliação 2025</p>
           <h1>{component.componentName}</h1>
           <p>{summarizeProblem(component)}</p>
         </div>
