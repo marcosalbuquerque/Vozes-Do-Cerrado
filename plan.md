@@ -59,9 +59,140 @@ Não haverá área exclusiva para auditor no MVP. A arquitetura deve, porém, pr
 - automação de decisões ou publicação de recomendações sem revisão humana;
 - apresentação, pitch e organização de arquivos no Google Drive.
 
-## 4. Regras de negócio essenciais
+## 4. Stack e arquitetura definidas
 
-### 4.1 Diagnóstico e priorização
+### 4.1 Decisões de tecnologia
+
+| Camada | Escolha | Uso no produto |
+| --- | --- | --- |
+| Linguagem | TypeScript em modo estrito | Tipos compartilhados e menos divergência entre frontend e backend |
+| Gerenciador/monorepo | pnpm workspaces | Um repositório com aplicações e pacotes compartilhados |
+| Frontend | React + Vite | SPA responsiva para gestor e área pública |
+| Rotas | React Router | Rotas públicas, autenticadas e estados de navegação |
+| Dados remotos | TanStack Query | Cache, invalidação, carregamento e retentativas da API |
+| Formulários | React Hook Form + Zod | Formulários acessíveis com validação compartilhável |
+| UI | Tailwind CSS + Radix UI | Tokens visuais e componentes acessíveis sem prender o produto a um tema pronto |
+| Mapas | MapLibre GL JS | Camadas geográficas interativas sem dependência de licença proprietária |
+| Gráficos | Recharts | Indicadores e comparações com alternativa textual obrigatória |
+| Testes frontend | Vitest + Testing Library + Playwright | Unidade, integração e fluxos ponta a ponta |
+| Backend | Node.js LTS + Express | API REST, autenticação, regras e integrações |
+| Contratos | Zod + OpenAPI | Validação em runtime e documentação da API |
+| Banco/ORM | PostgreSQL + Prisma | Dados relacionais, migrações e histórico auditável |
+| Filas/cache | Redis + BullMQ | Importações, análises de IA e tarefas demoradas fora da requisição HTTP |
+| Arquivos | Railway Storage Bucket + SDK S3 | Evidências, arquivos importados e URLs temporárias de acesso |
+| Testes backend | Vitest + Supertest | Regras, rotas, permissões e contratos |
+| Hospedagem | Railway | Frontend, API, worker, PostgreSQL, Redis e arquivos no mesmo projeto |
+
+As versões exatas devem ser fixadas no lockfile usando as versões estáveis disponíveis no início da implementação. Atualizações de versão não devem acontecer automaticamente em produção sem testes.
+
+### 4.2 Estrutura do monorepo
+
+```text
+vozes-do-cerrado/
+├── apps/
+│   ├── web/                 # React + Vite
+│   ├── api/                 # Express + API REST
+│   └── worker/              # BullMQ: importação, IA e processamento
+├── packages/
+│   ├── contracts/           # Schemas Zod e tipos de request/response
+│   ├── database/            # Prisma schema, migrations e seed
+│   ├── ui/                  # Componentes e tokens compartilhados
+│   ├── config/              # TypeScript, ESLint e configurações comuns
+│   └── observability/       # Logs, métricas e correlação
+├── docs/                    # Arquitetura, regras e contratos
+├── package.json
+├── pnpm-workspace.yaml
+└── plan.md
+```
+
+### 4.3 Serviços no Railway
+
+Um único projeto Railway terá ambientes separados de **produção** e **staging**. A primeira entrega pode começar somente com staging e promover a mesma configuração para produção após os fluxos críticos serem aprovados.
+
+| Serviço | Origem | Exposição | Responsabilidade |
+| --- | --- | --- | --- |
+| `web` | `apps/web` | Domínio público | Compilar o React e servir `dist` com Caddy, incluindo fallback da SPA |
+| `api` | `apps/api` | Domínio público | API Express em `0.0.0.0:$PORT`, autenticação e regras |
+| `worker` | `apps/worker` | Apenas rede privada | Consumir filas de importação, IA, relatórios e processamento de arquivos |
+| `postgres` | Serviço PostgreSQL Railway | Apenas rede privada | Banco transacional e auditável |
+| `redis` | Serviço Redis Railway | Apenas rede privada | Filas, locks, rate limit e cache efêmero |
+| `evidence-bucket` | Railway Storage Bucket | Privado | Evidências e arquivos originais, acessados por URL pré-assinada |
+
+Regras de implantação:
+
+- conectar o mesmo repositório GitHub aos três serviços de código;
+- usar comandos de build/start específicos do workspace e watch paths para evitar rebuilds desnecessários;
+- servir o frontend com Caddy em vez do servidor de desenvolvimento do Vite;
+- expor `GET /health/live` e `GET /health/ready` na API; o segundo só retorna sucesso quando dependências essenciais estão disponíveis;
+- configurar o healthcheck do Railway para `/health/ready` antes de direcionar tráfego ao novo deploy;
+- executar migrações Prisma como comando de pré-deploy da API, com migrações compatíveis com a versão anterior durante rollout;
+- manter `postgres`, `redis`, `worker` e bucket sem domínio público;
+- usar referências de variáveis do Railway para ligar serviços, sem copiar credenciais manualmente;
+- habilitar backups e testar restauração do PostgreSQL antes da produção;
+- usar Railway Buckets, não o disco efêmero do container, para arquivos persistentes;
+- evitar volume local na API e no worker para permitir réplicas e deploys sem acoplamento ao filesystem.
+
+### 4.4 Comunicação e segurança
+
+- O navegador chama somente a URL pública da API por HTTPS.
+- API, worker, PostgreSQL e Redis se comunicam pela rede privada do Railway.
+- O frontend recebe apenas variáveis públicas prefixadas com `VITE_`; nenhum segredo entra no bundle.
+- Autenticação usa sessão opaca em cookie `HttpOnly`, `Secure` e `SameSite`, persistida no PostgreSQL. Tokens de sessão não ficam em `localStorage`.
+- A API aplica CORS somente para os domínios conhecidos de `web` em cada ambiente.
+- Uploads usam URL pré-assinada de curta duração, validação de tipo/tamanho e chave gerada pelo servidor.
+- Downloads privados exigem autorização antes da geração da URL pré-assinada.
+- Redis guarda apenas dados efêmeros; PostgreSQL continua sendo a fonte de verdade.
+- Toda requisição recebe um `request_id`, propagado para jobs e logs.
+
+### 4.5 Contrato da API
+
+- Prefixo versionado: `/api/v1`.
+- JSON como formato padrão; datas em ISO 8601 e horários persistidos em UTC.
+- Erros no formato `{ code, message, details, requestId }`, sem stack trace para o cliente.
+- Paginação por cursor nas listas que podem crescer; filtros expressos por query string.
+- Schemas Zod compartilhados geram tipos do cliente e alimentam a especificação OpenAPI.
+- O frontend não acessa diretamente PostgreSQL, Redis ou Bucket.
+- Endpoints públicos usam DTOs próprios e nunca reutilizam cegamente entidades internas.
+
+### 4.6 Variáveis por serviço
+
+**`web`**
+
+- `VITE_API_URL`: domínio público da API;
+- `VITE_APP_ENV`: `staging` ou `production`;
+- `VITE_MAP_STYLE_URL`: estilo/base cartográfica aprovada.
+
+**`api`**
+
+- `DATABASE_URL`: referência ao PostgreSQL Railway;
+- `REDIS_URL`: referência ao Redis Railway;
+- `SESSION_SECRET`: segredo longo gerado por ambiente;
+- `ALLOWED_ORIGINS`: domínios públicos do frontend;
+- credenciais injetadas do Railway Bucket;
+- chave do provedor de IA e identificadores de modelo, somente no backend;
+- `LOG_LEVEL`, `APP_ENV` e limites de upload/rate limit.
+
+**`worker`**
+
+- `DATABASE_URL`, `REDIS_URL` e credenciais do Bucket;
+- chave do provedor de IA;
+- concorrência e limites de custo configuráveis por ambiente.
+
+### 4.7 Estratégia de deploy
+
+1. Pull request executa tipos, lint, testes e build de todos os workspaces afetados.
+2. Merge em `main` dispara deploy automático em staging.
+3. Railway executa a migração de banco antes de publicar a nova API.
+4. API precisa passar pelo healthcheck; web e worker precisam iniciar sem erro.
+5. Testes de fumaça verificam login, painel, detalhe de prioridade e criação de ação.
+6. Produção recebe promoção manual enquanto o produto estiver no MVP.
+7. Em falha, reverter o serviço; migrações devem ser compatíveis para que a versão anterior continue operando.
+
+Ambientes temporários por pull request e múltiplas réplicas entram depois que o custo e a necessidade real forem medidos.
+
+## 5. Regras de negócio essenciais
+
+### 5.1 Diagnóstico e priorização
 
 - A unidade de análise é: **estado → pilar/componente → item/critério → avaliação → evidência**.
 - A nota original do Painel ClimaBrasil nunca deve ser sobrescrita; correções ou novas importações geram uma nova versão do conjunto de dados.
@@ -75,21 +206,21 @@ Não haverá área exclusiva para auditor no MVP. A arquitetura deve, porém, pr
 - Empates devem ser resolvidos por maior risco estimado; persistindo o empate, pela maior lacuna de implementação.
 - Dados ausentes não equivalem a nota zero. Devem aparecer como “dados insuficientes” e reduzir a confiança da análise.
 
-### 4.2 Referências comparáveis
+### 5.2 Referências comparáveis
 
 - Uma referência deve ter desempenho superior no mesmo componente e dados suficientes para comparação.
 - A similaridade deve considerar primeiro região e características geoclimáticas; critérios e pesos precisam ser documentados.
 - A interface deve explicar por que o estado foi selecionado e sempre apresentar a ressalva de que a experiência é uma referência, não uma solução pronta.
 - Se não houver referência comparável confiável, o produto deve declarar essa limitação em vez de recomendar um caso frágil.
 
-### 4.3 Próximo nível e recomendações
+### 5.3 Próximo nível e recomendações
 
 - Cada recomendação deve estar ligada aos critérios ainda não atendidos para o próximo nível.
 - Recomendações devem separar ações verificáveis, responsáveis possíveis, evidências esperadas e dependências.
 - A IA pode resumir e ordenar conteúdo, mas não inventar requisito, evidência, impacto ou fonte.
 - Toda saída de IA deve guardar fontes, data, versão do modelo/prompt, nível de confiança e estado de revisão humana.
 
-### 4.4 Plano de ação e evidências
+### 5.4 Plano de ação e evidências
 
 - Uma ação deve conter: título, descrição, componente/item relacionado, responsável, prazo, status, indicador, meta, evidência esperada, dependências e observações.
 - Status mínimos: **não iniciada, em andamento, bloqueada, concluída e cancelada**.
@@ -97,20 +228,20 @@ Não haverá área exclusiva para auditor no MVP. A arquitetura deve, porém, pr
 - Evidências devem conter arquivo ou URL, descrição, fonte, data de referência, autor do registro e estado de validação.
 - Alterações relevantes precisam gerar histórico auditável com autor, data e valores anterior/novo.
 
-### 4.5 Riscos e números de impacto
+### 5.5 Riscos e números de impacto
 
 - Mapas e números de impacto devem mostrar fonte, unidade, território, período, metodologia e data de atualização.
 - Não usar frases causais ou alarmistas quando a fonte demonstrar apenas correlação, cenário ou estimativa.
 - O mapa deve diferenciar dado observado, projeção e ausência de dados.
 - A ligação entre gargalos, cenários e riscos precisa ser rastreável até as fontes originais e aprovada por uma pessoa responsável.
 
-### 4.6 Área pública e ouvidoria
+### 5.6 Área pública e ouvidoria
 
 - Apenas diagnósticos, ações e evidências marcados como públicos podem aparecer para a população.
 - A localização deve ser solicitada com consentimento e ter alternativa de seleção manual do estado.
 - O encaminhamento à ouvidoria deve levar estado, componente/tópico e um resumo editável; não deve enviar dados pessoais sem confirmação explícita.
 
-## 5. Fluxos prioritários
+## 6. Fluxos prioritários
 
 ### Fluxo A — gestor identifica uma prioridade
 
@@ -156,7 +287,7 @@ Não haverá área exclusiva para auditor no MVP. A arquitetura deve, porém, pr
 
 **Sucesso:** a pessoa compreende o status e chega ao canal oficial com uma manifestação contextualizada, sem envio automático de dados.
 
-## 6. Plano detalhado por tarefa do Jira
+## 7. Plano detalhado por tarefa do Jira
 
 ## KAN-4 — Definir funcionalidades e regras de negócio
 
@@ -273,10 +404,14 @@ Todo número apresentado no protótipo deve ter fonte, período e unidade visív
 
 ### Fundação técnica
 
-- [ ] confirmar framework, estratégia de renderização, biblioteca de mapas e estratégia de estado/formulários;
-- [ ] configurar lint, formatação, validação de tipos, testes e pipeline de integração contínua;
-- [ ] organizar tokens e componentes básicos do design system;
-- [ ] criar camada de cliente de API com tipos, autenticação, cancelamento, timeout e tratamento consistente de erros;
+- [ ] criar `apps/web` com React, Vite e TypeScript estrito;
+- [ ] configurar React Router, TanStack Query, React Hook Form e Zod;
+- [ ] configurar Tailwind CSS, Radix UI e os tokens do design system;
+- [ ] implementar MapLibre GL JS e Recharts com carregamento sob demanda;
+- [ ] criar cliente tipado para `/api/v1` a partir dos contratos compartilhados;
+- [ ] implementar autenticação por cookie, proteção de rotas e renovação/expiração de sessão;
+- [ ] configurar Vitest, Testing Library, Playwright, lint, formatação e validação de tipos;
+- [ ] adicionar `Dockerfile` e `Caddyfile` para servir o build Vite no Railway;
 - [ ] configurar telemetria sem registrar dados pessoais ou conteúdo sensível.
 
 ### Implementação por módulo
@@ -316,6 +451,18 @@ Todo número apresentado no protótipo deve ter fonte, período e unidade visív
 
 **Status no Jira:** A fazer.  
 **Objetivo detalhado:** fornecer dados versionados, regras explicáveis, integrações rastreáveis e APIs seguras para as experiências do gestor e da população.
+
+### Fundação técnica
+
+- [ ] criar `apps/api` com Express, Node.js LTS e TypeScript estrito;
+- [ ] criar `apps/worker` com BullMQ e processamento idempotente;
+- [ ] criar `packages/contracts` com Zod e geração da especificação OpenAPI;
+- [ ] criar `packages/database` com Prisma, migrations e seed de demonstração;
+- [ ] configurar middlewares de sessão, autorização, CORS, rate limit, logs e erros;
+- [ ] implementar `/health/live` e `/health/ready`;
+- [ ] configurar encerramento gracioso da API e do worker para deploys/restarts;
+- [ ] adicionar Dockerfiles e comandos de build/start por workspace;
+- [ ] criar configuração Railway para migração de pré-deploy, healthcheck e watch paths.
 
 ### Modelo de dados inicial
 
@@ -385,6 +532,10 @@ Todo número apresentado no protótipo deve ter fonte, período e unidade visív
 - [ ] documentação OpenAPI e exemplos de resposta/erro;
 - [ ] testes unitários, integração, contrato e autorização;
 - [ ] métricas de saúde, latência, erros, importação e filas.
+- [ ] configurar PostgreSQL e Redis pela rede privada do Railway;
+- [ ] configurar Railway Bucket e URLs pré-assinadas para evidências;
+- [ ] configurar backups, política de retenção e teste de restauração;
+- [ ] configurar staging, produção e promoção controlada entre ambientes.
 
 ### Critérios de aceite
 
@@ -417,17 +568,20 @@ Todo número apresentado no protótipo deve ter fonte, período e unidade visív
 - não há bloqueador conhecido nos fluxos principais;
 - limitações do MVP e da análise estão visíveis para o usuário.
 
-## 7. Sequência recomendada e dependências
+## 8. Sequência recomendada e dependências
 
 1. **Fechar decisões de KAN-4:** taxonomia, fórmula, permissões, fontes e recorte do MVP.
 2. **Concluir KAN-5:** fluxos, wireframes e testes de compreensão.
-3. **Definir contratos compartilhados:** modelo canônico, exemplos de payload e critérios de fonte/validação.
-4. **Executar KAN-6 e fundação de KAN-7 em paralelo:** alta fidelidade e ingestão/modelo de dados.
-5. **Construir o corte vertical:** painel → detalhe da prioridade → criação de uma ação, usando um estado e um componente reais.
-6. **Expandir KAN-11 e KAN-7:** riscos, acompanhamento, evidências, área pública e ouvidoria.
-7. **Executar KAN-10:** conformidade técnica, acessibilidade, segurança, dados, IA e correções finais.
+3. **Montar a fundação do monorepo:** workspaces, configurações comuns, contratos, testes e CI.
+4. **Criar o projeto Railway de staging:** `web`, `api`, `worker`, `postgres`, `redis` e `evidence-bucket`.
+5. **Definir contratos compartilhados:** modelo canônico, exemplos de payload e critérios de fonte/validação.
+6. **Executar KAN-6 e fundação de KAN-7 em paralelo:** alta fidelidade e ingestão/modelo de dados.
+7. **Construir o corte vertical:** painel → detalhe da prioridade → criação de uma ação, usando um estado e um componente reais.
+8. **Expandir KAN-11 e KAN-7:** riscos, acompanhamento, evidências, área pública e ouvidoria.
+9. **Preparar produção no Railway:** domínio, segredos, backups, healthchecks, migração e testes de fumaça.
+10. **Executar KAN-10:** conformidade técnica, acessibilidade, segurança, dados, IA e correções finais.
 
-## 8. Cortes de entrega
+## 9. Cortes de entrega
 
 ### Corte 1 — diagnóstico confiável
 
@@ -455,7 +609,7 @@ Todo número apresentado no protótipo deve ter fonte, período e unidade visív
 - publicar diagnóstico e ações selecionadas;
 - encaminhar manifestação contextualizada à ouvidoria.
 
-## 9. Métricas de sucesso
+## 10. Métricas de sucesso
 
 ### Experiência e valor
 
@@ -482,18 +636,20 @@ Todo número apresentado no protótipo deve ter fonte, período e unidade visív
 - taxa de erro do fluxo principal;
 - sucesso de restauração de backup e reprocessamento de importação.
 
-## 10. Decisões pendentes antes da implementação
+## 11. Decisões pendentes antes da implementação
 
-- Qual tecnologia será usada no frontend, backend, banco e hospedagem?
 - Qual é a fórmula inicial de prioridade e quem aprova seus pesos?
 - Quais fontes oficiais alimentarão risco, população exposta, orçamento e gargalos do TCU?
 - Como será calculada e validada a similaridade geoclimática?
-- A solução terá login próprio, autenticação institucional ou acesso demonstrativo?
+- O primeiro corte terá contas demonstrativas ou cadastro real com recuperação de senha?
 - Quais ações/evidências podem ser públicas por padrão e quem aprova a publicação?
 - A ouvidoria oferece URL parametrizada/API ou apenas um canal externo genérico?
 - Quais dados e estados serão usados no primeiro corte vertical demonstrável?
+- Qual domínio será usado para `web` e `api` em produção?
+- Qual região do Railway atende melhor aos usuários e às exigências de residência dos dados?
+- Qual orçamento mensal inicial e quais limites de CPU, memória, filas e uso de IA devem gerar alerta?
 
-## 11. Definition of Done global
+## 12. Definition of Done global
 
 Uma funcionalidade só está concluída quando:
 
@@ -506,3 +662,13 @@ Uma funcionalidade só está concluída quando:
 - fontes e limitações estão visíveis quando houver dado, risco ou IA;
 - telemetria necessária está ativa sem coletar dados além do necessário;
 - comportamento e contrato foram documentados para manutenção.
+
+## 13. Referências técnicas de implantação
+
+- [Railway — Deploy de monorepos](https://docs.railway.com/deployments/monorepo)
+- [Railway — React com Vite e Caddy](https://docs.railway.com/guides/react)
+- [Railway — Node.js e Express](https://docs.railway.com/guides/deploy-node-express-api-with-auto-scaling-secrets-and-zero-downtime)
+- [Railway — PostgreSQL](https://docs.railway.com/databases/postgresql)
+- [Railway — Redis](https://docs.railway.com/databases/redis)
+- [Railway — Storage Buckets](https://docs.railway.com/storage-buckets)
+- [Railway — Deployments e pré-deploy](https://docs.railway.com/deployments)
