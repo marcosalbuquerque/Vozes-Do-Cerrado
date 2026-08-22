@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 
 type IconName = "arrow" | "check" | "chevron" | "clock" | "download" | "info" | "message" | "shield";
@@ -91,6 +91,17 @@ export function FinalLayout() {
 }
 
 export function FinalDashboard() {
+  const [methodOpen, setMethodOpen] = useState(false);
+
+  useEffect(() => {
+    if (!methodOpen) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMethodOpen(false);
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [methodOpen]);
+
   return (
     <>
       <section className="vc-hero">
@@ -105,17 +116,32 @@ export function FinalDashboard() {
           </div>
         </div>
         <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
-          <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><span>Nota geral</span><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4 pontos</small></div>
+          <div className="vc-score-cluster">
+            <p className="vc-score-label">Nota geral</p>
+            <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4 pontos</small></div>
+          </div>
           <EvidenceWave />
           <p><span>72%</span> dos itens avaliados têm evidência disponível</p>
         </div>
       </section>
 
       <section className="vc-overview" aria-label="Resumo do diagnóstico">
-        <div><span className="vc-metric">03</span><p><strong>prioridades críticas</strong> pedem resposta coordenada</p></div>
-        <div><span className="vc-metric">2026</span><p><strong>ano da avaliação</strong> usada neste cenário</p></div>
-        <div className="vc-order-method"><Icon name="info"/><p><strong>Como calculamos a ordem?</strong> Nota, exposição territorial e evidências definem a prioridade.</p></div>
+        <div><span className="vc-metric">03</span><p><strong>Prioridades críticas</strong><span>Pedem resposta coordenada</span></p></div>
+        <div><span className="vc-metric">2026</span><p><strong>Ano da avaliação</strong><span>Usada neste cenário</span></p></div>
+        <div className="vc-order-method"><Icon name="info"/><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Saiba mais</button></div>
       </section>
+
+      {methodOpen && (
+        <div className="vc-method-layer">
+          <button className="vc-method-backdrop" type="button" aria-label="Fechar explicação" onClick={() => setMethodOpen(false)} />
+          <aside className="vc-method-panel" role="dialog" aria-modal="true" aria-labelledby="method-title">
+            <button className="vc-method-close" type="button" onClick={() => setMethodOpen(false)} autoFocus aria-label="Fechar">×</button>
+            <p className="vc-kicker vc-kicker-dark">Metodologia</p>
+            <h2 id="method-title">Como a ordem é definida</h2>
+            <p>Conteúdo explicativo em construção. Este espaço receberá os critérios, pesos e fontes usados para ordenar as prioridades.</p>
+          </aside>
+        </div>
+      )}
 
       <section className="vc-section vc-priorities" id="prioridades">
         <header className="vc-section-heading">
