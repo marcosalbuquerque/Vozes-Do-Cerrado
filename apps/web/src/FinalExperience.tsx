@@ -33,6 +33,12 @@ const finalPriorities = [
 
 const overallScore = 1.9;
 
+const stateOptions = [
+  { value: "GO", label: "Goiás" },
+  { value: "MT", label: "Mato Grosso" },
+  { value: "MS", label: "Mato Grosso do Sul" },
+];
+
 function getScoreTone(score: number) {
   if (score < 2) return "critical";
   if (score <= 3) return "attention";
@@ -117,7 +123,7 @@ export function FinalDashboard() {
           <p className="vc-lead">Encontre as lacunas que mais ampliam o risco climático e acompanhe a resposta pública com evidências claras.</p>
           <div className="vc-filter-row">
             <label htmlFor="state-select">Território analisado</label>
-            <select id="state-select" defaultValue="GO"><option value="GO">Goiás</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option></select>
+            <select id="state-select" defaultValue="GO">{stateOptions.map((state) => <option key={state.value} value={state.value}>{state.label}</option>)}</select>
             <a href="#prioridades" className="vc-button vc-button-lime">Ver prioridades <Icon name="arrow"/></a>
           </div>
         </div>
@@ -161,7 +167,7 @@ export function FinalDashboard() {
         <div className="vc-priority-list">
           {finalPriorities.map((priority, index) => (
             <article className={`vc-priority is-${getScoreTone(priority.score)} ${index === 0 ? "is-featured" : ""}`} key={priority.position}>
-              <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Alerta crítico">▲</span> : <span>{priority.position}</span>}</div>
+              <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Alerta crítico"><b aria-hidden="true">!</b></span> : <span>{priority.position}</span>}</div>
               <div className="vc-priority-main"><div className="vc-priority-status"><span className={`vc-pill is-${priority.tone}`}>{priority.level}</span></div><h3>{priority.component}</h3><p>{priority.reason}</p></div>
               <div className={`vc-priority-score is-${getScoreTone(priority.score)}`}><span>Nota</span><strong>{priority.score.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4</small></div>
               {priority.to ? <Link className="vc-round-link" to={priority.to} aria-label={`Ver detalhes de ${priority.component}`}><Icon name="arrow"/></Link> : <button className="vc-round-link" type="button" disabled aria-label={`${priority.component}: detalhe indisponível nesta demonstração`}><Icon name="arrow"/></button>}
@@ -201,20 +207,23 @@ export function FinalPriority() {
         </div>
       </section>
 
-      <section className="vc-next-action"><div><p className="vc-kicker">Próximo passo sugerido</p><h2>Acompanhe como o plano responde a esta lacuna.</h2><p>O TCU publica responsáveis, prazos e evidências. Nesta plataforma, você consulta o andamento sem alterar o plano.</p></div><Link to="/acompanhamento" className="vc-button vc-button-lime">Acompanhar plano <Icon name="arrow"/></Link><EvidenceWave compact /></section>
+      <section className="vc-next-action"><div><p className="vc-kicker">Próximo passo sugerido</p><h2>Acompanhe como o plano responde a esta lacuna.</h2><p>O TCU publica responsáveis, prazos e evidências. Nesta plataforma, você consulta o andamento sem alterar o plano.</p><Link to="/acompanhamento" className="vc-button vc-button-lime">Acompanhar plano <Icon name="arrow"/></Link></div><EvidenceWave compact /></section>
     </>
   );
 }
 
 export function FinalTracking() {
+  const [selectedState, setSelectedState] = useState("GO");
+  const selectedStateName = stateOptions.find((state) => state.value === selectedState)?.label ?? "Goiás";
   return (
     <>
       <section className="vc-page-intro"><div><p className="vc-kicker vc-kicker-dark">Acompanhamento público</p><h1>Da prioridade à entrega</h1><p>Consulte o andamento, os responsáveis e as evidências publicadas para cada ação.</p></div><div className="vc-readonly-seal"><Icon name="shield"/><span><strong>Somente leitura</strong>Atualizado pelo TCU</span></div></section>
       <section className="vc-section vc-tracking">
+        <div className="vc-tracking-filter"><div><label htmlFor="tracking-state-select">Território acompanhado</label><strong>{selectedStateName}</strong></div><select id="tracking-state-select" value={selectedState} onChange={(event) => setSelectedState(event.target.value)}>{stateOptions.map((state) => <option key={state.value} value={state.value}>{state.label}</option>)}</select></div>
         <aside className="vc-tcu-notice"><Icon name="info"/><div><strong>O plano de ação é atualizado pelo TCU</strong><p>O cliente acompanha por esta plataforma. Prazos, responsáveis, status e evidências não podem ser alterados aqui.</p></div></aside>
         <div className="vc-tracking-grid">
           <article className="vc-action-summary"><div className="vc-action-heading"><span className="vc-pill is-attention">Em andamento</span><small>Ação 01 de 03</small></div><h2>Atualizar o mapeamento estadual de áreas de risco</h2><p>Resposta vinculada à prioridade “Gestão de riscos climáticos”.</p><dl><div><dt>Responsável</dt><dd>Aguardando publicação do TCU</dd></div><div><dt>Prazo</dt><dd>Aguardando publicação do TCU</dd></div><div><dt>Última atualização</dt><dd>15 ago 2026 · cenário demonstrativo</dd></div></dl><button type="button" className="vc-evidence-button"><Icon name="download"/> Consultar evidências publicadas</button></article>
-          <article className="vc-timeline"><p className="vc-kicker vc-kicker-dark">Histórico do plano</p><h2>Andamento registrado</h2><ol><li className="is-complete"><span><Icon name="check"/></span><div><strong>Plano publicado</strong><small>Etapa concluída</small></div></li><li className="is-current"><span>02</span><div><strong>Responsável designado</strong><small>Etapa atual</small></div></li><li><span>03</span><div><strong>Execução acompanhada</strong><small>Aguardando atualização</small></div></li><li><span>04</span><div><strong>Evidência final publicada</strong><small>Aguardando atualização</small></div></li></ol></article>
+          <article className="vc-timeline"><p className="vc-kicker vc-kicker-dark">Histórico do plano</p><h2>Andamento registrado</h2><ol><li className="is-complete"><span aria-label="Concluído"><Icon name="check"/></span><div><strong>Plano publicado</strong><small>Etapa concluída</small></div></li><li className="is-current"><span>02</span><div><strong>Responsável designado</strong><small>Etapa atual</small></div></li><li><span>03</span><div><strong>Execução acompanhada</strong><small>Aguardando atualização</small></div></li><li><span>04</span><div><strong>Evidência final publicada</strong><small>Aguardando atualização</small></div></li></ol></article>
         </div>
       </section>
       <section className="vc-support-band"><div><Icon name="message"/><span><strong>Encontrou uma informação incorreta?</strong>Envie uma dúvida, correção, reclamação ou sugestão.</span></div><Link to="/ouvidoria" className="vc-button vc-button-dark">Falar com a Ouvidoria <Icon name="arrow"/></Link></section>
@@ -228,7 +237,7 @@ export function FinalOmbudsman() {
   if (sent) return <section className="vc-form-shell vc-success"><span className="vc-success-mark"><Icon name="check"/></span><p className="vc-kicker vc-kicker-dark">Demonstração da Ouvidoria</p><h1>Manifestação registrada neste cenário</h1><p>Nenhuma informação foi enviada. O retorno confirma apenas o comportamento da interface.</p><Link to="/acompanhamento" className="vc-button vc-button-dark">Voltar ao acompanhamento <Icon name="arrow"/></Link></section>;
   return (
     <section className="vc-form-shell">
-      <div className="vc-form-intro"><Link to="/acompanhamento" className="vc-back">← Voltar ao acompanhamento</Link><p className="vc-kicker vc-kicker-dark">Canal do cliente</p><h1>Fale com a Ouvidoria</h1><p>Registre dúvidas, pedidos de correção, reclamações ou sugestões sobre os dados e o acompanhamento.</p><aside><Icon name="info"/><p><strong>A Ouvidoria não altera o plano.</strong> As atualizações continuam sob responsabilidade do TCU.</p></aside></div>
+      <div className="vc-form-intro"><Link to="/acompanhamento" className="vc-back">← Voltar ao acompanhamento</Link><p className="vc-kicker vc-kicker-dark">Canal do cliente</p><h1>Fale com a Ouvidoria</h1><p>Registre dúvidas, pedidos de correção, reclamações ou sugestões sobre os dados e o acompanhamento.</p></div>
       <form className="vc-final-form" onSubmit={submit}><p className="vc-form-required">Todos os campos são obrigatórios</p><label>Tipo de manifestação<select required defaultValue=""><option value="" disabled>Selecione uma opção</option><option>Dúvida sobre os dados</option><option>Pedido de correção</option><option>Reclamação</option><option>Sugestão</option></select></label><label>Assunto<input required placeholder="Resuma o motivo do contato"/></label><label>Mensagem<textarea required placeholder="Descreva a informação que precisa ser analisada"/></label><label className="vc-consent"><input type="checkbox" required/><span>Confirmo que revisei a mensagem e autorizo o registro desta manifestação.</span></label><small>Ambiente demonstrativo: nenhuma informação será enviada.</small><button className="vc-button vc-button-dark" type="submit">Registrar manifestação <Icon name="arrow"/></button></form>
     </section>
   );
