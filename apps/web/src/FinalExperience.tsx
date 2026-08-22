@@ -104,7 +104,7 @@ export function FinalDashboard() {
             <a href="#prioridades" className="vc-button vc-button-lime">Ver prioridades <Icon name="arrow"/></a>
           </div>
         </div>
-        <div className="vc-hero-data">
+        <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
           <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><span>Nota geral</span><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4 pontos</small></div>
           <EvidenceWave />
           <p><span>72%</span> dos itens avaliados têm evidência disponível</p>
