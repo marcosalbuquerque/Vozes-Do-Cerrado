@@ -109,7 +109,7 @@ export function FinalDashboard() {
           <p className="vc-kicker">Painel ClimaBrasil · avaliação 2025</p>
           <h1>Onde o DF precisa agir <em>primeiro?</em></h1>
           <p className="vc-lead">As prioridades abaixo vêm diretamente da avaliação oficial. A menor nota aparece primeiro.</p>
-          <div className="vc-filter-row"><label htmlFor="state-select">Território analisado</label><select id="state-select" value="DF" disabled aria-readonly="true"><option value="DF">Distrito Federal</option></select><a href="#prioridades" className="vc-button vc-button-lime">Ver prioridades <Icon name="arrow"/></a></div>
+          <div className="vc-filter-row"><label htmlFor="state-select">Território analisado</label><div className="vc-state-select"><select id="state-select" defaultValue="DF"><option value="DF">Distrito Federal</option></select><Icon name="chevron"/></div><a href="#prioridades" className="vc-button vc-button-lime">Ver critérios <Icon name="arrow"/></a></div>
         </div>
         <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
           <div className="vc-score-cluster"><p className={`vc-score-status is-${getScoreTone(overallScore)}`}>{getScoreStatus(overallScore)}</p><div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><span>Média dos componentes</span><strong>{formatScore(overallScore)}</strong><small>de 4 pontos</small></div></div>
@@ -127,7 +127,7 @@ export function FinalDashboard() {
       {methodOpen && <div className="vc-method-layer"><button className="vc-method-backdrop" type="button" aria-label="Fechar explicação" onClick={() => setMethodOpen(false)} /><aside className="vc-method-panel" role="dialog" aria-modal="true" aria-labelledby="method-title"><button className="vc-method-close" type="button" onClick={() => setMethodOpen(false)} autoFocus aria-label="Fechar">×</button><p className="vc-kicker vc-kicker-dark">Metodologia verificável</p><h2 id="method-title">A menor nota vem primeiro</h2><p>Cada classificação do Painel ClimaBrasil é convertida para a escala de 0 a 4. A nota do componente é a média aritmética dos itens avaliados. Componentes com nota abaixo de 2,00 entram na lista crítica e são ordenados do menor para o maior.</p><p>Itens “Não avaliados” não viram zero. Se um componente contém essa classificação, ele fica fora da priorização até que a avaliação seja concluída.</p></aside></div>}
 
       <section className="vc-section vc-priorities" id="prioridades">
-        <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Distrito Federal</p><h2>Prioridades por menor nota</h2></div><p>{priorities.length} componentes abaixo de 2,00, sem ponderação adicional ou dado ilustrativo.</p></header>
+        <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Distrito Federal</p><h2>Critérios de priorização</h2></div><p>{priorities.length} componentes abaixo de 2,00, ordenados da menor para a maior nota.</p></header>
         <div className="vc-priority-list">
           {priorities.map((priority, index) => <article className={`vc-priority is-${getScoreTone(priority.score ?? 0)} ${index === 0 ? "is-featured" : ""}`} key={priority.componentIdentifier}>
             <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Menor nota"><b aria-hidden="true">!</b></span> : <span>{String(index + 1).padStart(2, "0")}</span>}</div>

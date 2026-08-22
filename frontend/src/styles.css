@@ -40,8 +40,9 @@ html { scroll-behavior: smooth; }
 .vc-lead { max-width: 640px; margin: 30px 0 36px; color: rgba(255,255,255,.76); font-size: clamp(18px, 2vw, 22px); line-height: 1.45; }
 .vc-filter-row { max-width: 580px; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; padding: 14px; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(0,0,0,.12); }
 .vc-filter-row label { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: .02em; }
-.vc-filter-row select { min-height: 50px; padding: 0 44px 0 15px; border: 1px solid rgba(255,255,255,.3); border-radius: 8px; color: #fff; background: #06461f; font-weight: 700; }
-.vc-filter-row select:disabled { cursor: default; opacity: 1; color: #fff; -webkit-text-fill-color: #fff; }
+.vc-state-select { position: relative; min-width: 0; }
+.vc-filter-row select { width: 100%; min-height: 50px; appearance: none; padding: 0 48px 0 15px; border: 1px solid rgba(255,255,255,.3); border-radius: 8px; color: #fff; background: #06461f; font-weight: 700; }
+.vc-state-select .vc-icon { position: absolute; top: 50%; right: 15px; width: 18px; height: 18px; pointer-events: none; transform: translateY(-50%) rotate(90deg); }
 .vc-button { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; border: 0; border-radius: 8px; text-decoration: none; font-weight: 800; transition: transform .18s ease, box-shadow .18s ease; }
 .vc-button:hover { transform: translateY(-2px); }.vc-button-lime { color: var(--ink) !important; background: var(--lime); box-shadow: 0 5px 0 #94a000; }.vc-button-dark { color: #fff !important; background: var(--indigo); box-shadow: 0 5px 0 #1e1e35; }
 .vc-hero-data { position: relative; min-height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, var(--teal), #003b1b); }
