@@ -17,3 +17,5 @@ pnpm dev
 ```
 
 O frontend estará disponível em `http://localhost:5173/prototipo-baixa`.
+
+No Railway, o Railpack executa `pnpm build` e inicia a SPA com `pnpm start`, respeitando a variável `PORT` fornecida pela plataforma.

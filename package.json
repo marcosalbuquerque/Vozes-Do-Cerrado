@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "pnpm --filter @vozes/web dev",
     "build": "pnpm --filter @vozes/web build",
+    "start": "pnpm --filter @vozes/web preview --host 0.0.0.0 --port ${PORT:-3000}",
     "preview": "pnpm --filter @vozes/web preview",
     "typecheck": "pnpm --filter @vozes/web typecheck"
   }
 }
-
