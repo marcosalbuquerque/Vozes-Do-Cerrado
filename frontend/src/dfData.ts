@@ -1,5 +1,6 @@
 import pcbRawData from "./data/pcb-raw-data.csv?raw";
 import taxonomyRawData from "./data/painel-climabrasil-taxonomia.csv?raw";
+import aiRankingData from "./data/ai-ranking.json";
 
 export type AssessmentItem = {
   assessmentItemId: string;
@@ -129,6 +130,8 @@ function buildAssessment(): AssessmentResponse {
     grouped.set(item.componentIdentifier, [...(grouped.get(item.componentIdentifier) ?? []), item]);
   }
 
+  const aiRanking = (aiRankingData as Record<string, number>) || {};
+
   const componentes = [...grouped.entries()].map(([componentIdentifier, items]): ComponentScore => {
     const containsNotAssessed = items.some((item) => item.scoreText.trim().toLocaleLowerCase("pt-BR") === "não avaliado");
     const evaluatedItems = items.filter((item) => item.normalizedScore !== null);
@@ -159,6 +162,16 @@ function buildAssessment(): AssessmentResponse {
   }).sort((left, right) => {
     if (left.score === null) return 1;
     if (right.score === null) return -1;
+    
+    const leftAiScore = aiRanking[left.componentIdentifier] ?? -1;
+    const rightAiScore = aiRanking[right.componentIdentifier] ?? -1;
+    
+    // Se a IA gerou notas para os dois, quem tem maior pontuação de prioridade da IA vem primeiro (mais crítico)
+    if (leftAiScore !== -1 && rightAiScore !== -1) {
+       return rightAiScore - leftAiScore;
+    }
+
+    // Fallback: ordem por nota oficial crescente (menor nota = mais urgente)
     return left.score - right.score;
   });
 
