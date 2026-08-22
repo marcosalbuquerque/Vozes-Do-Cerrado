@@ -242,7 +242,7 @@ export function FinalDashboard() {
         <div className="vc-priority-list">
           {priorities.map((priority, index) => <article className={`vc-priority is-${getScoreTone(priority.score ?? 0)} ${index === 0 ? "is-featured" : ""}`} key={priority.componentIdentifier}>
             <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Menor nota"><b aria-hidden="true">!</b></span> : <span>{String(index + 1).padStart(2, "0")}</span>}</div>
-            <div className="vc-priority-main"><div className="vc-priority-status"><span className="vc-pill is-critical">{getComponentStage(priority.score ?? 0)}</span><span className="vc-component-code">{priority.componentIdentifier} · {priority.axisName}</span></div><h3>{priority.componentName}</h3><p>{summarizeProblem(priority)}</p></div>
+            <div className="vc-priority-main"><div className="vc-priority-status"><span className="vc-score-status is-critical">{getComponentStage(priority.score ?? 0)}</span><span className="vc-component-code">{priority.componentIdentifier} · {priority.axisName}</span></div><h3>{priority.componentName}</h3><p>{summarizeProblem(priority)}</p></div>
             <div className={`vc-priority-score is-${getScoreTone(priority.score ?? 0)}`}><span>Nota real</span><strong>{formatScore(priority.score ?? 0)}</strong><small>de 4</small></div>
             <Link className="vc-round-link" to={`/prioridade/${priority.componentIdentifier}`} aria-label={`Ver dados de ${priority.componentName}`}><Icon name="arrow"/></Link>
           </article>)}
@@ -284,7 +284,6 @@ function interpolateData(observations: RiskObservation[], targetYear: number) {
 function DfRiskMap() {
   const [selectedId, setSelectedId] = useState("water");
   const [currentYear, setCurrentYear] = useState(2020);
-  const [isPlaying, setIsPlaying] = useState(true);
   const [geoJson, setGeoJson] = useState<GeoJson | null>(null);
   const indicator = riskIndicators.find((item) => item.id === selectedId) ?? riskIndicators[0];
   
@@ -299,25 +298,23 @@ function DfRiskMap() {
 
   useEffect(() => {
     setCurrentYear(2020);
-    setIsPlaying(true);
   }, [selectedId]);
 
-  // Animação do ano subindo de 2020 até 2050 passando por 2030
+  // Animação contínua e suave do ano subindo de 2020 até 2050 passando por 2030
   useEffect(() => {
-    if (!isPlaying || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     
     const interval = window.setInterval(() => {
       setCurrentYear((prevYear) => {
         if (prevYear >= 2050) {
           return 2020;
         }
-        // Subida suave de anos
         return prevYear + 1;
       });
     }, 280);
 
     return () => window.clearInterval(interval);
-  }, [isPlaying]);
+  }, []);
 
   const mapPaths = useMemo(() => {
     const polygons = geoJson?.features[0]?.geometry.coordinates ?? [];
@@ -350,7 +347,7 @@ function DfRiskMap() {
       </div>
 
       <div className="vc-map-canvas">
-        {/* Banner com o ano bem grande no meio e em cima do mapa */}
+        {/* Banner limpo com apenas o ano grande subindo no meio e sobre o mapa */}
         <div className="vc-map-year-banner" aria-live="polite">
           <div className="vc-year-kicker">PROJEÇÃO TEMPORAL · ADAPTABRASIL</div>
           <div className="vc-year-big-display">
@@ -358,44 +355,7 @@ function DfRiskMap() {
           </div>
           <div className="vc-year-timeline-bar" role="progressbar" aria-valuenow={currentYear} aria-valuemin={2020} aria-valuemax={2050}>
             <div className="vc-year-timeline-fill" style={{ width: `${timelinePercent}%` }} />
-            <div className="vc-year-milestones">
-              <button
-                type="button"
-                className={`vc-year-step ${currentYear === 2020 ? "is-active" : ""}`}
-                onClick={() => { setCurrentYear(2020); setIsPlaying(false); }}
-                title="Ir para o ano 2020 (Atual)"
-              >
-                <span>2020</span>
-                <small>Atual</small>
-              </button>
-              <button
-                type="button"
-                className={`vc-year-step ${currentYear === 2030 ? "is-active" : ""}`}
-                onClick={() => { setCurrentYear(2030); setIsPlaying(false); }}
-                title="Ir para a projeção de 2030"
-              >
-                <span>2030</span>
-                <small>Projeção</small>
-              </button>
-              <button
-                type="button"
-                className={`vc-year-step ${currentYear === 2050 ? "is-active" : ""}`}
-                onClick={() => { setCurrentYear(2050); setIsPlaying(false); }}
-                title="Ir para a projeção de 2050"
-              >
-                <span>2050</span>
-                <small>Projeção</small>
-              </button>
-            </div>
           </div>
-          <button
-            type="button"
-            className="vc-timeline-play-btn"
-            onClick={() => setIsPlaying(!isPlaying)}
-            aria-label={isPlaying ? "Pausar animação temporal" : "Iniciar animação temporal"}
-          >
-            {isPlaying ? "⏸ Pausar animação" : "▶ Reproduzir subida (2020 → 2030 → 2050)"}
-          </button>
         </div>
 
         <svg viewBox="0 0 520 360" role="img" aria-label={`${indicator.label} no Distrito Federal: índice ${observation.value}, classe ${observation.level}, ano ${currentYear}`}>
@@ -450,7 +410,19 @@ export function FinalPriority() {
   return <>
     <section className="vc-detail-hero">
       <div className="vc-detail-top"><Link to="/" className="vc-back">← Voltar ao diagnóstico</Link><span className="vc-detail-priority">{component.componentIdentifier} · nota {formatScore(component.score)}</span></div>
-      <div className="vc-detail-title"><div><p className="vc-kicker">{component.axisName} · avaliação 2025</p><h1>{component.componentName}</h1><p>{summarizeProblem(component)}</p></div><div className="vc-level"><span>Nível calculado</span><strong>{getComponentStage(component.score)}</strong></div></div>
+      <div className="vc-detail-title">
+        <div>
+          <p className="vc-kicker">{component.axisName} · avaliação 2025</p>
+          <h1>{component.componentName}</h1>
+          <p>{summarizeProblem(component)}</p>
+        </div>
+        <div className="vc-level">
+          <span>Nível calculado</span>
+          <div className="vc-context-pill-wrap">
+            <span className="vc-score-status is-critical">{getComponentStage(component.score)}</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section className="vc-risk-section" aria-labelledby="mapa-title">
