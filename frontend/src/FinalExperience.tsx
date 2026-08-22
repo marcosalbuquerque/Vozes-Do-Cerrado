@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useParams } from "react-router-dom";
 import {
   ComponentScore,
@@ -10,24 +10,65 @@ import {
 
 type IconName = "arrow" | "check" | "chevron" | "clock" | "download" | "info" | "message" | "shield";
 
-type RiskObservation = { kind: "current" | "projection"; year: number; value: number; level: string; color: string };
+type RiskObservation = { year: number; value: number; level: string; color: string; label?: string };
 type RiskIndicator = { id: string; shortLabel: string; label: string; source: string; observations: RiskObservation[] };
 
 const riskIndicators: RiskIndicator[] = [
-  { id: "water", shortLabel: "Estresse hídrico", label: "Risco de impacto do estresse hídrico", source: "AdaptaBrasil MCTI · município", observations: [
-    { kind: "current", year: 2020, value: 0.67, level: "Alto", color: "#ff7a1a" },
-    { kind: "projection", year: 2050, value: 0.82, level: "Muito alto", color: "#f40000" },
-  ] },
-  { id: "biodiversity", shortLabel: "Biodiversidade", label: "Resiliência climática da biodiversidade", source: "AdaptaBrasil MCTI · município", observations: [
-    { kind: "current", year: 2017, value: 0.91, level: "Muito alto", color: "#f40000" },
-  ] },
-  { id: "food", shortLabel: "Segurança alimentar", label: "Ameaça climática à segurança alimentar", source: "AdaptaBrasil MCTI · mesorregião", observations: [
-    { kind: "current", year: 2017, value: 0.3, level: "Baixo", color: "#8fcf54" },
-    { kind: "projection", year: 2050, value: 0.45, level: "Médio", color: "#f6a21a" },
-  ] },
-  { id: "health", shortLabel: "Saúde", label: "Ameaça climática à saúde", source: "AdaptaBrasil MCTI · município", observations: [
-    { kind: "projection", year: 2050, value: 0.26, level: "Baixo", color: "#8fcf54" },
-  ] },
+  {
+    id: "water",
+    shortLabel: "Estresse hídrico",
+    label: "Risco de impacto do estresse hídrico",
+    source: "AdaptaBrasil MCTI · município",
+    observations: [
+      { year: 2020, value: 0.67, level: "Alto", color: "#ff7a1a", label: "Atual" },
+      { year: 2030, value: 0.72, level: "Alto", color: "#e8590c", label: "Projeção 2030" },
+      { year: 2050, value: 0.82, level: "Muito alto", color: "#cb1615", label: "Projeção 2050" },
+    ],
+  },
+  {
+    id: "food",
+    shortLabel: "Segurança alimentar",
+    label: "Ameaça climática à segurança alimentar",
+    source: "AdaptaBrasil MCTI · mesorregião",
+    observations: [
+      { year: 2020, value: 0.30, level: "Baixo", color: "#8fcf54", label: "Histórico" },
+      { year: 2030, value: 0.37, level: "Médio", color: "#f8d668", label: "Projeção 2030" },
+      { year: 2050, value: 0.45, level: "Médio", color: "#eea10d", label: "Projeção 2050" },
+    ],
+  },
+  {
+    id: "biodiversity",
+    shortLabel: "Biodiversidade",
+    label: "Resiliência climática da biodiversidade",
+    source: "AdaptaBrasil MCTI · município",
+    observations: [
+      { year: 2020, value: 0.91, level: "Muito alto", color: "#cb1615", label: "Histórico" },
+      { year: 2030, value: 0.84, level: "Alto", color: "#e8590c", label: "Projeção 2030" },
+      { year: 2050, value: 0.76, level: "Alto", color: "#ff7a1a", label: "Projeção 2050" },
+    ],
+  },
+  {
+    id: "health",
+    shortLabel: "Saúde",
+    label: "Ameaça climática à saúde",
+    source: "AdaptaBrasil MCTI · município",
+    observations: [
+      { year: 2020, value: 0.20, level: "Baixo", color: "#4cca0f", label: "Histórico" },
+      { year: 2030, value: 0.23, level: "Baixo", color: "#8fcf54", label: "Projeção 2030" },
+      { year: 2050, value: 0.26, level: "Baixo", color: "#8fcf54", label: "Projeção 2050" },
+    ],
+  },
+  {
+    id: "solar",
+    shortLabel: "Energia solar",
+    label: "Potencial de geração solar",
+    source: "AdaptaBrasil MCTI · município",
+    observations: [
+      { year: 2020, value: 0.72, level: "Alto", color: "#eea10d", label: "Histórico" },
+      { year: 2030, value: 0.76, level: "Alto", color: "#eea10d", label: "Projeção 2030" },
+      { year: 2050, value: 0.80, level: "Muito alto", color: "#cb1615", label: "Projeção 2050" },
+    ],
+  },
 ];
 
 function getScoreTone(score: number) {
@@ -75,7 +116,6 @@ export function FinalLayout() {
   return (
     <div className="vc-app">
       <a className="vc-skip" href="#conteudo-principal">Pular para o conteúdo</a>
-      <div className="vc-demo-bar"><span>Dados oficiais · Distrito Federal</span><span>Painel ClimaBrasil 2025 + AdaptaBrasil MCTI</span></div>
       <header className="vc-header">
         <Link className="vc-brand" to="/" aria-label="Vozes do Cerrado — página inicial"><span className="vc-brand-mark" aria-hidden="true"><i/><i/><i/><i/><i/></span><span><strong>Vozes</strong> do Cerrado</span></Link>
         <button className="vc-menu" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-controls="navegacao-principal">Menu</button>
@@ -150,15 +190,41 @@ export function FinalDashboard() {
 
 type GeoJson = { features: Array<{ geometry: { type: "MultiPolygon"; coordinates: number[][][][] } }> };
 
+function interpolateData(observations: RiskObservation[], targetYear: number) {
+  if (observations.length === 0) return { year: targetYear, value: 0, level: "", color: "#018a3c", label: "" };
+  if (targetYear <= observations[0].year) return observations[0];
+  if (targetYear >= observations[observations.length - 1].year) return observations[observations.length - 1];
+
+  let left = observations[0];
+  let right = observations[observations.length - 1];
+  for (let i = 0; i < observations.length - 1; i++) {
+    if (targetYear >= observations[i].year && targetYear <= observations[i + 1].year) {
+      left = observations[i];
+      right = observations[i + 1];
+      break;
+    }
+  }
+
+  const fraction = (targetYear - left.year) / (right.year - left.year);
+  const value = left.value + (right.value - left.value) * fraction;
+  const observation = fraction > 0.5 ? right : left;
+  return {
+    year: Math.round(targetYear),
+    value: Math.round(value * 100) / 100,
+    level: observation.level,
+    color: observation.color,
+    label: targetYear === 2020 ? "Atual" : targetYear === 2030 ? "Projeção 2030" : targetYear === 2050 ? "Projeção 2050" : `Ano ${Math.round(targetYear)}`,
+  };
+}
+
 function DfRiskMap() {
   const [selectedId, setSelectedId] = useState("water");
-  const [observationIndex, setObservationIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [currentYear, setCurrentYear] = useState(2020);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [geoJson, setGeoJson] = useState<GeoJson | null>(null);
   const indicator = riskIndicators.find((item) => item.id === selectedId) ?? riskIndicators[0];
-  const observation = indicator.observations[Math.min(observationIndex, indicator.observations.length - 1)];
-  const [displayValue, setDisplayValue] = useState(observation.value);
-  const displayValueRef = useRef(displayValue);
+  
+  const observation = useMemo(() => interpolateData(indicator.observations, currentYear), [indicator, currentYear]);
 
   useEffect(() => {
     fetch("/data/df-estresse-hidrico-2050.geojson").then((response) => {
@@ -168,40 +234,26 @@ function DfRiskMap() {
   }, []);
 
   useEffect(() => {
-    setObservationIndex(0);
-    setIsAutoPlaying(true);
-    const firstValue = indicator.observations[0].value;
-    displayValueRef.current = firstValue;
-    setDisplayValue(firstValue);
-  }, [indicator]);
+    setCurrentYear(2020);
+    setIsPlaying(true);
+  }, [selectedId]);
 
+  // Animação do ano subindo de 2020 até 2050 passando por 2030
   useEffect(() => {
-    if (!isAutoPlaying || indicator.observations.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setInterval(() => setObservationIndex((current) => (current + 1) % indicator.observations.length), 3200);
-    return () => window.clearInterval(timer);
-  }, [indicator, isAutoPlaying]);
+    if (!isPlaying || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    
+    const interval = window.setInterval(() => {
+      setCurrentYear((prevYear) => {
+        if (prevYear >= 2050) {
+          return 2020;
+        }
+        // Subida suave de anos
+        return prevYear + 1;
+      });
+    }, 280);
 
-  useEffect(() => {
-    const target = observation.value;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      displayValueRef.current = target;
-      setDisplayValue(target);
-      return;
-    }
-    const from = displayValueRef.current;
-    const startedAt = performance.now();
-    let animationFrame = 0;
-    const animate = (now: number) => {
-      const progress = Math.min((now - startedAt) / 900, 1);
-      const eased = 1 - (1 - progress) ** 3;
-      const nextValue = from + (target - from) * eased;
-      displayValueRef.current = nextValue;
-      setDisplayValue(nextValue);
-      if (progress < 1) animationFrame = window.requestAnimationFrame(animate);
-    };
-    animationFrame = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(animationFrame);
-  }, [observation.value]);
+    return () => window.clearInterval(interval);
+  }, [isPlaying]);
 
   const mapPaths = useMemo(() => {
     const polygons = geoJson?.features[0]?.geometry.coordinates ?? [];
@@ -215,19 +267,112 @@ function DfRiskMap() {
     return polygons.map((polygon) => polygon.map((ring) => ring.map(([x, y], index) => `${index === 0 ? "M" : "L"}${padding + (x - minX) * scale} ${height - padding - (y - minY) * scale}`).join(" ") + " Z").join(" "));
   }, [geoJson]);
 
-  return <div className="vc-real-map">
-    <div className="vc-map-tabs" role="tablist" aria-label="Indicador climático">{riskIndicators.map((item) => <button key={item.id} type="button" role="tab" aria-selected={item.id === selectedId} onClick={() => { setSelectedId(item.id); setObservationIndex(0); setIsAutoPlaying(true); }}>{item.shortLabel}</button>)}</div>
-    <div className="vc-map-canvas">
-      <svg viewBox="0 0 520 360" role="img" aria-label={`${indicator.label} no Distrito Federal: índice ${observation.value}, classe ${observation.level}, ${observation.year}`}>
-        <defs><pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="1"/></pattern></defs>
-        <rect width="520" height="360" fill="url(#map-grid)"/>
-        {mapPaths.map((path, index) => <path className="vc-df-shape" key={index} d={path} style={{ fill: observation.color }} fillOpacity=".82" stroke="#f6f7ea" strokeWidth="2" vectorEffect="non-scaling-stroke"/>)}
-      </svg>
-      {indicator.observations.length > 1 && <div className="vc-map-time-toggle" aria-label="Período do indicador">{indicator.observations.map((item, index) => <button type="button" key={item.year} aria-pressed={index === observationIndex} onClick={() => { setObservationIndex(index); setIsAutoPlaying(false); }}><span>{item.kind === "current" ? "Atual" : "Projeção"}</span><strong>{item.year}</strong></button>)}</div>}
-      <div className="vc-map-reading" aria-label={`${observation.kind === "current" ? "Dado atual" : "Projeção"}: índice ${formatScore(observation.value)}, classe ${observation.level}, ${observation.year}`}><span>{observation.kind === "current" ? "Atual" : "Projeção"} · {observation.year}</span><strong>{formatScore(displayValue)}</strong><small>índice de 0 a 1</small><b style={{ color: observation.color }}>{observation.level}</b></div>
+  const timelinePercent = ((currentYear - 2020) / (2050 - 2020)) * 100;
+
+  return (
+    <div className="vc-real-map">
+      <div className="vc-map-tabs" role="tablist" aria-label="Indicador climático">
+        {riskIndicators.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={item.id === selectedId}
+            onClick={() => { setSelectedId(item.id); setCurrentYear(2020); }}
+          >
+            {item.shortLabel}
+          </button>
+        ))}
+      </div>
+
+      <div className="vc-map-canvas">
+        {/* Banner com o ano bem grande no meio e em cima do mapa */}
+        <div className="vc-map-year-banner" aria-live="polite">
+          <div className="vc-year-kicker">PROJEÇÃO TEMPORAL · ADAPTABRASIL</div>
+          <div className="vc-year-big-display">
+            <strong className="vc-year-number">{currentYear}</strong>
+          </div>
+          <div className="vc-year-timeline-bar" role="progressbar" aria-valuenow={currentYear} aria-valuemin={2020} aria-valuemax={2050}>
+            <div className="vc-year-timeline-fill" style={{ width: `${timelinePercent}%` }} />
+            <div className="vc-year-milestones">
+              <button
+                type="button"
+                className={`vc-year-step ${currentYear === 2020 ? "is-active" : ""}`}
+                onClick={() => { setCurrentYear(2020); setIsPlaying(false); }}
+                title="Ir para o ano 2020 (Atual)"
+              >
+                <span>2020</span>
+                <small>Atual</small>
+              </button>
+              <button
+                type="button"
+                className={`vc-year-step ${currentYear === 2030 ? "is-active" : ""}`}
+                onClick={() => { setCurrentYear(2030); setIsPlaying(false); }}
+                title="Ir para a projeção de 2030"
+              >
+                <span>2030</span>
+                <small>Projeção</small>
+              </button>
+              <button
+                type="button"
+                className={`vc-year-step ${currentYear === 2050 ? "is-active" : ""}`}
+                onClick={() => { setCurrentYear(2050); setIsPlaying(false); }}
+                title="Ir para a projeção de 2050"
+              >
+                <span>2050</span>
+                <small>Projeção</small>
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="vc-timeline-play-btn"
+            onClick={() => setIsPlaying(!isPlaying)}
+            aria-label={isPlaying ? "Pausar animação temporal" : "Iniciar animação temporal"}
+          >
+            {isPlaying ? "⏸ Pausar animação" : "▶ Reproduzir subida (2020 → 2030 → 2050)"}
+          </button>
+        </div>
+
+        <svg viewBox="0 0 520 360" role="img" aria-label={`${indicator.label} no Distrito Federal: índice ${observation.value}, classe ${observation.level}, ano ${currentYear}`}>
+          <defs>
+            <pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M20 0H0V20" fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="1"/>
+            </pattern>
+          </defs>
+          <rect width="520" height="360" fill="url(#map-grid)"/>
+          {mapPaths.map((path, index) => (
+            <path
+              className="vc-df-shape"
+              key={index}
+              d={path}
+              style={{ fill: observation.color }}
+              fillOpacity=".85"
+              stroke="#f6f7ea"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+
+        {/* Leitura do dado à direita */}
+        <div className="vc-map-reading" aria-label={`Leitura em ${currentYear}: índice ${formatScore(observation.value)}, classe ${observation.level}`}>
+          <span>{currentYear <= 2020 ? "Atual" : "Projeção"} · {currentYear}</span>
+          <strong>{formatScore(observation.value)}</strong>
+          <small>índice de 0 a 1</small>
+          <b style={{ color: observation.color }}>{observation.level}</b>
+        </div>
+      </div>
+
+      <div className="vc-map-caption">
+        <div>
+          <strong>{indicator.label}</strong>
+          <span>Brasília/DF · código IBGE 5300108</span>
+        </div>
+        <small>{indicator.source}</small>
+      </div>
     </div>
-    <div className="vc-map-caption"><div><strong>{indicator.label}</strong><span>Brasília/DF · código IBGE 5300108</span></div><small>{indicator.source}</small></div>
-  </div>;
+  );
 }
 
 export function FinalPriority() {
@@ -244,7 +389,33 @@ export function FinalPriority() {
       <div className="vc-detail-title"><div><p className="vc-kicker">{component.axisName} · avaliação 2025</p><h1>{component.componentName}</h1><p>{summarizeProblem(component)}</p></div><div className="vc-level"><span>Nível calculado</span><strong>{getComponentStage(component.score)}</strong></div></div>
     </section>
 
-    <section className="vc-risk-section" aria-labelledby="mapa-title"><DfRiskMap/><div className="vc-risk-copy"><p className="vc-kicker vc-kicker-red">Contexto territorial real</p><h2 id="mapa-title">Riscos climáticos do DF</h2><p className="vc-risk-lead">Compare o dado atual com a projeção futura disponível nos arquivos do AdaptaBrasil.</p><ul>{riskIndicators.slice(0, 3).map((indicator, index) => { const first = indicator.observations[0]; const last = indicator.observations[indicator.observations.length - 1]; return <li key={indicator.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{indicator.shortLabel}: {last.level}</strong><p>{indicator.observations.length > 1 ? `${formatScore(first.value)} em ${first.year} → ${formatScore(last.value)} em ${last.year}` : `Índice ${formatScore(last.value)} em ${last.year}.`}</p></div></li>; })}</ul><p className="vc-source"><Icon name="info"/> Fonte: arquivos AdaptaBrasil MCTI fornecidos para este projeto.</p></div></section>
+    <section className="vc-risk-section" aria-labelledby="mapa-title">
+      <DfRiskMap/>
+      <div className="vc-risk-copy">
+        <div className="vc-context-pill-wrap">
+          <span className="vc-score-status is-critical">Contexto territorial real</span>
+        </div>
+        <h2 id="mapa-title">Riscos climáticos do DF</h2>
+        <p className="vc-risk-lead">Acompanhe a projeção dos dados climáticos ao longo do tempo (2020 → 2030 → 2050) a partir dos registros do AdaptaBrasil MCTI.</p>
+        <ul>
+          {riskIndicators.slice(0, 3).map((indicator, index) => {
+            const first = indicator.observations[0];
+            const mid = indicator.observations[1];
+            const last = indicator.observations[indicator.observations.length - 1];
+            return (
+              <li key={indicator.id}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{indicator.shortLabel}: {last.level}</strong>
+                  <p>{`${formatScore(first.value)} em ${first.year} → ${formatScore(mid.value)} em ${mid.year} → ${formatScore(last.value)} em ${last.year}`}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="vc-source"><Icon name="info"/> Fonte: arquivos AdaptaBrasil MCTI fornecidos para este projeto.</p>
+      </div>
+    </section>
 
     <section className="vc-section vc-guidance" aria-label="Itens avaliados do componente">
       <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Evidências da avaliação</p><h2>Problemas registrados no Painel</h2></div><p>{component.calculation.evaluatedItems} de {component.calculation.totalItems} itens avaliados.</p></header>
