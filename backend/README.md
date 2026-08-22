@@ -5,7 +5,7 @@ API isolada do frontend para calcular as notas públicas do Distrito Federal e c
 ## Segurança da chave
 
 1. Copie `.env.example` para `.env` somente na sua máquina.
-2. Preencha `OPENAI_API_KEY` no `.env` local ou nas variáveis privadas do serviço de backend no Railway.
+2. Preencha `GEMINI_API_KEY` no `.env` local ou nas variáveis privadas do serviço de backend no Vercel/Railway.
 3. Nunca coloque a chave no frontend, em variável `VITE_*`, em commits ou em requisições do navegador.
 
 O arquivo `.env` já é ignorado pelo Git. Em produção, crie um serviço separado no Railway e configure `backend` como diretório raiz. O serviço atual do frontend continua isolado em `frontend`.
