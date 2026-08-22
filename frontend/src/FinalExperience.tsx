@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useParams } from "react-router-dom";
 import {
   ComponentScore,
@@ -10,12 +10,25 @@ import {
 
 type IconName = "arrow" | "check" | "chevron" | "clock" | "download" | "info" | "message" | "shield";
 
-const riskIndicators = [
-  { id: "water", shortLabel: "Estresse hídrico", label: "Risco de impacto do estresse hídrico", value: 0.82, year: 2050, level: "Muito alto", color: "#f40000", source: "AdaptaBrasil MCTI · município" },
-  { id: "biodiversity", shortLabel: "Biodiversidade", label: "Resiliência climática da biodiversidade", value: 0.91, year: 2017, level: "Muito alto", color: "#f40000", source: "AdaptaBrasil MCTI · município" },
-  { id: "food", shortLabel: "Segurança alimentar", label: "Ameaça climática à segurança alimentar", value: 0.45, year: 2050, level: "Médio", color: "#f6a21a", source: "AdaptaBrasil MCTI · mesorregião" },
-  { id: "health", shortLabel: "Saúde", label: "Ameaça climática à saúde", value: 0.26, year: 2050, level: "Baixo", color: "#8fcf54", source: "AdaptaBrasil MCTI · município" },
-] as const;
+type RiskObservation = { kind: "current" | "projection"; year: number; value: number; level: string; color: string };
+type RiskIndicator = { id: string; shortLabel: string; label: string; source: string; observations: RiskObservation[] };
+
+const riskIndicators: RiskIndicator[] = [
+  { id: "water", shortLabel: "Estresse hídrico", label: "Risco de impacto do estresse hídrico", source: "AdaptaBrasil MCTI · município", observations: [
+    { kind: "current", year: 2020, value: 0.67, level: "Alto", color: "#ff7a1a" },
+    { kind: "projection", year: 2050, value: 0.82, level: "Muito alto", color: "#f40000" },
+  ] },
+  { id: "biodiversity", shortLabel: "Biodiversidade", label: "Resiliência climática da biodiversidade", source: "AdaptaBrasil MCTI · município", observations: [
+    { kind: "current", year: 2017, value: 0.91, level: "Muito alto", color: "#f40000" },
+  ] },
+  { id: "food", shortLabel: "Segurança alimentar", label: "Ameaça climática à segurança alimentar", source: "AdaptaBrasil MCTI · mesorregião", observations: [
+    { kind: "current", year: 2017, value: 0.3, level: "Baixo", color: "#8fcf54" },
+    { kind: "projection", year: 2050, value: 0.45, level: "Médio", color: "#f6a21a" },
+  ] },
+  { id: "health", shortLabel: "Saúde", label: "Ameaça climática à saúde", source: "AdaptaBrasil MCTI · município", observations: [
+    { kind: "projection", year: 2050, value: 0.26, level: "Baixo", color: "#8fcf54" },
+  ] },
+];
 
 function getScoreTone(score: number) {
   if (score < 2) return "critical";
@@ -138,9 +151,13 @@ export function FinalDashboard() {
 type GeoJson = { features: Array<{ geometry: { type: "MultiPolygon"; coordinates: number[][][][] } }> };
 
 function DfRiskMap() {
-  const [selectedId, setSelectedId] = useState<(typeof riskIndicators)[number]["id"]>("water");
+  const [selectedId, setSelectedId] = useState("water");
+  const [observationIndex, setObservationIndex] = useState(0);
   const [geoJson, setGeoJson] = useState<GeoJson | null>(null);
   const indicator = riskIndicators.find((item) => item.id === selectedId) ?? riskIndicators[0];
+  const observation = indicator.observations[Math.min(observationIndex, indicator.observations.length - 1)];
+  const [displayValue, setDisplayValue] = useState(observation.value);
+  const displayValueRef = useRef(displayValue);
 
   useEffect(() => {
     fetch("/data/df-estresse-hidrico-2050.geojson").then((response) => {
@@ -148,6 +165,41 @@ function DfRiskMap() {
       return response.json() as Promise<GeoJson>;
     }).then(setGeoJson).catch(() => setGeoJson(null));
   }, []);
+
+  useEffect(() => {
+    setObservationIndex(0);
+    const firstValue = indicator.observations[0].value;
+    displayValueRef.current = firstValue;
+    setDisplayValue(firstValue);
+  }, [indicator]);
+
+  useEffect(() => {
+    if (indicator.observations.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => setObservationIndex((current) => (current + 1) % indicator.observations.length), 3200);
+    return () => window.clearInterval(timer);
+  }, [indicator]);
+
+  useEffect(() => {
+    const target = observation.value;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      displayValueRef.current = target;
+      setDisplayValue(target);
+      return;
+    }
+    const from = displayValueRef.current;
+    const startedAt = performance.now();
+    let animationFrame = 0;
+    const animate = (now: number) => {
+      const progress = Math.min((now - startedAt) / 900, 1);
+      const eased = 1 - (1 - progress) ** 3;
+      const nextValue = from + (target - from) * eased;
+      displayValueRef.current = nextValue;
+      setDisplayValue(nextValue);
+      if (progress < 1) animationFrame = window.requestAnimationFrame(animate);
+    };
+    animationFrame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [observation.value]);
 
   const mapPaths = useMemo(() => {
     const polygons = geoJson?.features[0]?.geometry.coordinates ?? [];
@@ -164,12 +216,13 @@ function DfRiskMap() {
   return <div className="vc-real-map">
     <div className="vc-map-tabs" role="tablist" aria-label="Indicador climático">{riskIndicators.map((item) => <button key={item.id} type="button" role="tab" aria-selected={item.id === selectedId} onClick={() => setSelectedId(item.id)}>{item.shortLabel}</button>)}</div>
     <div className="vc-map-canvas">
-      <svg viewBox="0 0 520 360" role="img" aria-label={`${indicator.label} no Distrito Federal: índice ${indicator.value}, classe ${indicator.level}, ${indicator.year}`}>
+      <svg viewBox="0 0 520 360" role="img" aria-label={`${indicator.label} no Distrito Federal: índice ${observation.value}, classe ${observation.level}, ${observation.year}`}>
         <defs><pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="1"/></pattern></defs>
         <rect width="520" height="360" fill="url(#map-grid)"/>
-        {mapPaths.map((path, index) => <path key={index} d={path} fill={indicator.color} fillOpacity=".82" stroke="#f6f7ea" strokeWidth="2" vectorEffect="non-scaling-stroke"/>)}
+        {mapPaths.map((path, index) => <path className="vc-df-shape" key={index} d={path} style={{ fill: observation.color }} fillOpacity=".82" stroke="#f6f7ea" strokeWidth="2" vectorEffect="non-scaling-stroke"/>)}
       </svg>
-      <div className="vc-map-reading"><span>{indicator.year}</span><strong>{formatScore(indicator.value)}</strong><small>índice de 0 a 1</small><b style={{ color: indicator.color }}>{indicator.level}</b></div>
+      {indicator.observations.length > 1 && <div className="vc-map-time-toggle" aria-label="Período do indicador">{indicator.observations.map((item, index) => <button type="button" key={item.year} aria-pressed={index === observationIndex} onClick={() => setObservationIndex(index)}><span>{item.kind === "current" ? "Atual" : "Projeção"}</span><strong>{item.year}</strong></button>)}</div>}
+      <div className="vc-map-reading" aria-label={`${observation.kind === "current" ? "Dado atual" : "Projeção"}: índice ${formatScore(observation.value)}, classe ${observation.level}, ${observation.year}`}><span>{observation.kind === "current" ? "Atual" : "Projeção"} · {observation.year}</span><strong>{formatScore(displayValue)}</strong><small>índice de 0 a 1</small><b style={{ color: observation.color }}>{observation.level}</b></div>
     </div>
     <div className="vc-map-caption"><div><strong>{indicator.label}</strong><span>Brasília/DF · código IBGE 5300108</span></div><small>{indicator.source}</small></div>
   </div>;
@@ -189,7 +242,7 @@ export function FinalPriority() {
       <div className="vc-detail-title"><div><p className="vc-kicker">{component.axisName} · avaliação 2025</p><h1>{component.componentName}</h1><p>{summarizeProblem(component)}</p></div><div className="vc-level"><span>Nível calculado</span><strong>{getComponentStage(component.score)}</strong></div></div>
     </section>
 
-    <section className="vc-risk-section" aria-labelledby="mapa-title"><DfRiskMap/><div className="vc-risk-copy"><p className="vc-kicker vc-kicker-red">Contexto territorial real</p><h2 id="mapa-title">Riscos climáticos do DF</h2><p className="vc-risk-lead">O mapa usa o limite oficial disponibilizado nos arquivos do AdaptaBrasil e permite comparar quatro indicadores do território.</p><ul>{riskIndicators.slice(0, 3).map((indicator, index) => <li key={indicator.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{indicator.shortLabel}: {indicator.level}</strong><p>Índice {formatScore(indicator.value)} em {indicator.year}.</p></div></li>)}</ul><p className="vc-source"><Icon name="info"/> Fonte: arquivos AdaptaBrasil MCTI fornecidos para este projeto.</p></div></section>
+    <section className="vc-risk-section" aria-labelledby="mapa-title"><DfRiskMap/><div className="vc-risk-copy"><p className="vc-kicker vc-kicker-red">Contexto territorial real</p><h2 id="mapa-title">Riscos climáticos do DF</h2><p className="vc-risk-lead">Compare o dado atual com a projeção futura disponível nos arquivos do AdaptaBrasil.</p><ul>{riskIndicators.slice(0, 3).map((indicator, index) => { const first = indicator.observations[0]; const last = indicator.observations[indicator.observations.length - 1]; return <li key={indicator.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{indicator.shortLabel}: {last.level}</strong><p>{indicator.observations.length > 1 ? `${formatScore(first.value)} em ${first.year} → ${formatScore(last.value)} em ${last.year}` : `Índice ${formatScore(last.value)} em ${last.year}.`}</p></div></li>; })}</ul><p className="vc-source"><Icon name="info"/> Fonte: arquivos AdaptaBrasil MCTI fornecidos para este projeto.</p></div></section>
 
     <section className="vc-section vc-guidance" aria-label="Itens avaliados do componente">
       <header className="vc-section-heading"><div><p className="vc-kicker vc-kicker-dark">Evidências da avaliação</p><h2>Problemas registrados no Painel</h2></div><p>{component.calculation.evaluatedItems} de {component.calculation.totalItems} itens avaliados.</p></header>
