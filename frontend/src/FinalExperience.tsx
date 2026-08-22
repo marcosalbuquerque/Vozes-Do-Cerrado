@@ -241,7 +241,7 @@ export function FinalDashboard() {
         <div className="vc-priority-list">
           {priorities.map((priority, index) => <article className={`vc-priority is-${getScoreTone(priority.score ?? 0)} ${index === 0 ? "is-featured" : ""}`} key={priority.componentIdentifier}>
             <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Menor nota"><b aria-hidden="true">!</b></span> : <span>{String(index + 1).padStart(2, "0")}</span>}</div>
-            <div className="vc-priority-main"><div className="vc-priority-status"><span className="vc-score-status is-critical">{getComponentStage(priority.score ?? 0)}</span><span className="vc-component-code">{priority.componentIdentifier} · {priority.axisName}</span></div><h3>{priority.componentName}</h3><p>{summarizeProblem(priority)}</p></div>
+            <div className="vc-priority-main"><div className="vc-priority-status"><span className="vc-score-status is-critical">{getComponentStage(priority.score ?? 0)}</span><span className="vc-component-code">{priority.componentIdentifier} · {priority.axisName}</span></div><h3>{priority.componentName}</h3></div>
             <div className={`vc-priority-score is-${getScoreTone(priority.score ?? 0)}`}><span>Nota real</span><strong>{formatScore(priority.score ?? 0)}</strong><small>de 4</small></div>
             <Link className="vc-round-link" to={`/prioridade/${priority.componentIdentifier}`} aria-label={`Ver dados de ${priority.componentName}`}><Icon name="arrow"/></Link>
           </article>)}
