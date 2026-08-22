@@ -38,7 +38,7 @@ O Climaton Brasil 2026 transforma dados climáticos complexos em compreensão p�
 
 1. **O dado vem primeiro.** A forma visual deve tornar a informação mais compreensível.
 2. **Uma ideia forte por composição.** Cada tela, card ou página deve ter um foco dominante.
-3. **Contraste cria direção.** Verde, lima e marinho organizam a hierarquia; não competem entre si.
+3. **Contraste cria direção.** Verde institucional, verde-floresta e lima organizam a hierarquia; não competem entre si.
 4. **Complexidade em camadas.** Começar pelo significado, permitir aprofundamento e manter a fonte acessível.
 5. **A identidade se move.** Barras, ondas e progressões representam dados vivos, colaboração e transformação.
 
@@ -76,7 +76,7 @@ Os valores abaixo foram medidos diretamente da paleta fornecida. Eles são a fon
 | `color.green.900` | `#005222` | verde profundo, contraste e fundos premium |
 | `color.teal.700` | `#017147` | apoio, dados ambientais e variação tonal |
 | `color.lime.400` | `#D8E814` | energia, ênfase, destaques e chamada para ação |
-| `color.indigo.800` | `#333355` | autoridade, texto escuro e fundos institucionais |
+| `color.forest.800` | `#296235` | verde-floresta estrutural, títulos e fundos institucionais |
 | `color.blue.400` | `#62A4FA` | informação, tecnologia e links |
 | `color.lime.500` | `#4CCA0F` | sucesso, avanço e desempenho positivo |
 | `color.yellow.300` | `#F8D668` | atenção leve, contexto e faixas intermediárias |
@@ -93,7 +93,7 @@ Os valores abaixo foram medidos diretamente da paleta fornecida. Eles são a fon
 | `brand.primary` | `green.500` | marca, botões principais, blocos institucionais |
 | `brand.primary.deep` | `green.900` | fundos, rodapés, cabeçalhos e contraste |
 | `brand.accent` | `lime.400` | palavras-chave, números e chamadas |
-| `content.strong` | `indigo.800` | títulos e texto em superfícies claras |
+| `content.strong` | `forest.800` | títulos e texto em superfícies claras |
 | `content.default` | `neutral.900` | corpo de texto |
 | `surface.default` | `white` | leitura e visualização de dados |
 | `surface.muted` | `neutral.100` | agrupamentos e áreas de apoio |
@@ -108,7 +108,7 @@ Os valores abaixo foram medidos diretamente da paleta fornecida. Eles são a fon
 |---|---|---:|---|
 | `green.900` | branco | 9,42:1 | liberado para qualquer texto |
 | `teal.700` | branco | 6,08:1 | liberado para qualquer texto |
-| `indigo.800` | branco | 12,03:1 | liberado para qualquer texto |
+| `forest.800` | branco | 7,26:1 | liberado para qualquer texto |
 | `red.600` | branco | 5,73:1 | liberado para qualquer texto |
 | `lime.400` | `neutral.900` | 12,28:1 | combinação de destaque preferencial |
 | `yellow.300` | `neutral.900` | 11,76:1 | liberado para qualquer texto |
@@ -117,13 +117,13 @@ Os valores abaixo foram medidos diretamente da paleta fornecida. Eles são a fon
 | `amber.500` | `neutral.900` | 7,73:1 | liberado para qualquer texto |
 | `neutral.100` | `neutral.900` | 12,54:1 | liberado para qualquer texto |
 
-> **Atenção:** branco sobre `green.500` mede aproximadamente 4,47:1. Use apenas em títulos grandes ou componentes com peso forte. Para texto pequeno, prefira `green.900`, `teal.700` ou `indigo.800`.
+> **Atenção:** branco sobre `green.500` mede aproximadamente 4,47:1. Use apenas em títulos grandes ou componentes com peso forte. Para texto pequeno, prefira `green.900`, `teal.700` ou `forest.800`.
 
 ### 3.4 Proporção cromática
 
 - **60% neutros:** branco, cinza-claro e preto.
 - **25% verdes:** superfícies e reconhecimento de marca.
-- **10% marinho ou índigo:** estrutura e autoridade.
+- **10% verde-floresta:** estrutura e autoridade.
 - **5% lima e cores de status:** destaque e dados.
 
 Não usar todas as cores em uma única composição fora de visualizações de dados. Em peças editoriais, limitar a uma cor principal, uma cor de apoio e um neutro.
@@ -135,7 +135,7 @@ Gradientes são permitidos apenas em fundos atmosféricos, capas e transições 
 ```css
 --gradient-climate-deep: linear-gradient(135deg, #005222 0%, #017147 55%, #018A3C 100%);
 --gradient-data-energy: linear-gradient(90deg, #018A3C 0%, #D8E814 100%);
---gradient-night-earth: linear-gradient(180deg, #1E1E1E 0%, #333355 100%);
+--gradient-night-earth: linear-gradient(180deg, #1E1E1E 0%, #296235 100%);
 ```
 
 Não aplicar gradiente em gráficos comparativos ou áreas que carreguem significado quantitativo.
@@ -254,7 +254,7 @@ A assinatura observada combina:
 - Criar e manter um arquivo mestre vetorial antes da produção final.
 - Preservar a proporção, o ritmo e a espessura das barras.
 - Área de proteção mínima: a altura da letra “C” ao redor da assinatura.
-- Versão preferencial: verde sobre branco ou branco sobre `green.900`/`indigo.800`.
+- Versão preferencial: verde sobre branco ou branco sobre `green.900`/`forest.800`.
 - Em fundos fotográficos, usar uma área sólida ou overlay que garanta contraste.
 - Não aplicar contorno, sombra, textura, rotação ou gradiente dentro do logo.
 - Não reconstruir o símbolo com outro mapa, equalizador ou ícone genérico.
@@ -277,7 +277,7 @@ As faixas verticais com cantos arredondados vistas na apresentação funcionam c
 
 - Largura sugerida: 16–32 px em telas 16:9.
 - Usar em apenas uma lateral ou em pares assimétricos.
-- Cor preferencial: `lime.400` sobre marinho; verde sobre branco.
+- Cor preferencial: `lime.400` sobre verde-floresta; verde sobre branco.
 - Não usar quando houver barra lateral funcional na interface.
 
 ### 6.5 Fotografia
@@ -305,7 +305,7 @@ Evitar imagens genéricas de folhas na mão, lâmpadas com plantas, apertos de m
 - Estilo linear ou sólido simples, nunca misturar os dois na mesma composição.
 - Grade base de 24 px; espessura visual equivalente a 2 px.
 - Cantos levemente arredondados.
-- Usar `green.500`, `indigo.800` ou cor semântica correspondente.
+- Usar `green.500`, `forest.800` ou cor semântica correspondente.
 - Ícones complementam labels; não substituem texto em ações críticas.
 
 ---
@@ -334,7 +334,7 @@ Para manter coerência com o material analisado:
 Ordem preferencial para até seis séries:
 
 1. `green.500`
-2. `indigo.800`
+2. `forest.800`
 3. `blue.400`
 4. `amber.500`
 5. `teal.700`
@@ -346,7 +346,7 @@ Não usar `green.500`, `teal.700` e `green.900` lado a lado em marcas pequenas; 
 
 - Título responde à pergunta do gráfico, não repete o nome da métrica.
 - Subtítulo informa período, recorte e unidade.
-- Eixos e grades usam `neutral.100`; texto usa `indigo.800`.
+- Eixos e grades usam `neutral.100`; texto usa `forest.800`.
 - Valor principal deve estar próximo da marca correspondente.
 - Legendas externas são último recurso; preferir labels diretos.
 - Sempre incluir fonte, data de atualização e observação metodológica.
@@ -390,7 +390,7 @@ Cada indicador deve permitir acesso progressivo a:
 
 | Propriedade | Especificação |
 |---|---|
-| Fundo | branco, `green.900` ou `indigo.800` |
+| Fundo | branco, `green.900` ou `forest.800` |
 | Raio | 16–28 px |
 | Número | Display L ou XL |
 | Label | Body M, até duas linhas |
@@ -578,7 +578,7 @@ Pergunta pública
   --clima-green-900: #005222;
   --clima-teal-700: #017147;
   --clima-lime-400: #D8E814;
-  --clima-indigo-800: #333355;
+  --clima-forest-800: #296235;
   --clima-blue-400: #62A4FA;
   --clima-lime-500: #4CCA0F;
   --clima-yellow-300: #F8D668;
@@ -591,7 +591,7 @@ Pergunta pública
   --clima-brand-primary: var(--clima-green-500);
   --clima-brand-deep: var(--clima-green-900);
   --clima-brand-accent: var(--clima-lime-400);
-  --clima-content-strong: var(--clima-indigo-800);
+  --clima-content-strong: var(--clima-forest-800);
   --clima-content-default: var(--clima-neutral-900);
   --clima-surface-default: var(--clima-white);
   --clima-surface-muted: var(--clima-neutral-100);
