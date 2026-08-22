@@ -39,6 +39,12 @@ function getScoreTone(score: number) {
   return "positive";
 }
 
+function getScoreStatus(score: number) {
+  if (score < 2) return "Crítico";
+  if (score <= 3) return "Mediano";
+  return "Ótimo";
+}
+
 function Icon({ name }: { name: IconName }) {
   const paths: Record<IconName, ReactNode> = {
     arrow: <><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></>,
@@ -117,10 +123,11 @@ export function FinalDashboard() {
         </div>
         <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
           <div className="vc-score-cluster">
-            <p className="vc-score-label">Nota geral</p>
+            <p className={`vc-score-status is-${getScoreTone(overallScore)}`}>{getScoreStatus(overallScore)}</p>
             <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}>
-              <div className="vc-score-value"><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><span>/ 4</span></div>
-              <small>Desempenho crítico</small>
+              <span>Nota geral</span>
+              <strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong>
+              <small>de 4 pontos</small>
             </div>
           </div>
           <EvidenceWave />
@@ -154,8 +161,8 @@ export function FinalDashboard() {
         <div className="vc-priority-list">
           {finalPriorities.map((priority, index) => (
             <article className={`vc-priority is-${getScoreTone(priority.score)} ${index === 0 ? "is-featured" : ""}`} key={priority.position}>
-              <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Alerta crítico">🔺</span> : <span>{priority.position}</span>}</div>
-              <div className="vc-priority-main"><div className="vc-priority-status">{index !== 0 && <span className="vc-priority-alert" aria-hidden="true">🔺</span>}<span className={`vc-pill is-${priority.tone}`}>{priority.level}</span></div><h3>{priority.component}</h3><p>{priority.reason}</p></div>
+              <div className="vc-priority-index">{index === 0 ? <span className="vc-priority-index-alert" role="img" aria-label="Alerta crítico">▲</span> : <span>{priority.position}</span>}</div>
+              <div className="vc-priority-main"><div className="vc-priority-status"><span className={`vc-pill is-${priority.tone}`}>{priority.level}</span></div><h3>{priority.component}</h3><p>{priority.reason}</p></div>
               <div className={`vc-priority-score is-${getScoreTone(priority.score)}`}><span>Nota</span><strong>{priority.score.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4</small></div>
               {priority.to ? <Link className="vc-round-link" to={priority.to} aria-label={`Ver detalhes de ${priority.component}`}><Icon name="arrow"/></Link> : <button className="vc-round-link" type="button" disabled aria-label={`${priority.component}: detalhe indisponível nesta demonstração`}><Icon name="arrow"/></button>}
             </article>
