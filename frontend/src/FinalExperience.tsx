@@ -153,6 +153,7 @@ type GeoJson = { features: Array<{ geometry: { type: "MultiPolygon"; coordinates
 function DfRiskMap() {
   const [selectedId, setSelectedId] = useState("water");
   const [observationIndex, setObservationIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [geoJson, setGeoJson] = useState<GeoJson | null>(null);
   const indicator = riskIndicators.find((item) => item.id === selectedId) ?? riskIndicators[0];
   const observation = indicator.observations[Math.min(observationIndex, indicator.observations.length - 1)];
@@ -168,16 +169,17 @@ function DfRiskMap() {
 
   useEffect(() => {
     setObservationIndex(0);
+    setIsAutoPlaying(true);
     const firstValue = indicator.observations[0].value;
     displayValueRef.current = firstValue;
     setDisplayValue(firstValue);
   }, [indicator]);
 
   useEffect(() => {
-    if (indicator.observations.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!isAutoPlaying || indicator.observations.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => setObservationIndex((current) => (current + 1) % indicator.observations.length), 3200);
     return () => window.clearInterval(timer);
-  }, [indicator]);
+  }, [indicator, isAutoPlaying]);
 
   useEffect(() => {
     const target = observation.value;
@@ -214,14 +216,14 @@ function DfRiskMap() {
   }, [geoJson]);
 
   return <div className="vc-real-map">
-    <div className="vc-map-tabs" role="tablist" aria-label="Indicador climático">{riskIndicators.map((item) => <button key={item.id} type="button" role="tab" aria-selected={item.id === selectedId} onClick={() => setSelectedId(item.id)}>{item.shortLabel}</button>)}</div>
+    <div className="vc-map-tabs" role="tablist" aria-label="Indicador climático">{riskIndicators.map((item) => <button key={item.id} type="button" role="tab" aria-selected={item.id === selectedId} onClick={() => { setSelectedId(item.id); setObservationIndex(0); setIsAutoPlaying(true); }}>{item.shortLabel}</button>)}</div>
     <div className="vc-map-canvas">
       <svg viewBox="0 0 520 360" role="img" aria-label={`${indicator.label} no Distrito Federal: índice ${observation.value}, classe ${observation.level}, ${observation.year}`}>
         <defs><pattern id="map-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="1"/></pattern></defs>
         <rect width="520" height="360" fill="url(#map-grid)"/>
         {mapPaths.map((path, index) => <path className="vc-df-shape" key={index} d={path} style={{ fill: observation.color }} fillOpacity=".82" stroke="#f6f7ea" strokeWidth="2" vectorEffect="non-scaling-stroke"/>)}
       </svg>
-      {indicator.observations.length > 1 && <div className="vc-map-time-toggle" aria-label="Período do indicador">{indicator.observations.map((item, index) => <button type="button" key={item.year} aria-pressed={index === observationIndex} onClick={() => setObservationIndex(index)}><span>{item.kind === "current" ? "Atual" : "Projeção"}</span><strong>{item.year}</strong></button>)}</div>}
+      {indicator.observations.length > 1 && <div className="vc-map-time-toggle" aria-label="Período do indicador">{indicator.observations.map((item, index) => <button type="button" key={item.year} aria-pressed={index === observationIndex} onClick={() => { setObservationIndex(index); setIsAutoPlaying(false); }}><span>{item.kind === "current" ? "Atual" : "Projeção"}</span><strong>{item.year}</strong></button>)}</div>}
       <div className="vc-map-reading" aria-label={`${observation.kind === "current" ? "Dado atual" : "Projeção"}: índice ${formatScore(observation.value)}, classe ${observation.level}, ${observation.year}`}><span>{observation.kind === "current" ? "Atual" : "Projeção"} · {observation.year}</span><strong>{formatScore(displayValue)}</strong><small>índice de 0 a 1</small><b style={{ color: observation.color }}>{observation.level}</b></div>
     </div>
     <div className="vc-map-caption"><div><strong>{indicator.label}</strong><span>Brasília/DF · código IBGE 5300108</span></div><small>{indicator.source}</small></div>
