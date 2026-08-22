@@ -106,7 +106,7 @@ export function FinalDashboard() {
       <section className="vc-overview" aria-label="Resumo do diagnóstico">
         <div><span className="vc-metric">03</span><p><strong>prioridades críticas</strong> pedem resposta coordenada</p></div>
         <div><span className="vc-metric">2026</span><p><strong>ano da avaliação</strong> usada neste cenário</p></div>
-        <div><span className="vc-status-dot"/><p><strong>Dados demonstrativos</strong> não representam avaliação oficial</p></div>
+        <div className="vc-order-method"><Icon name="info"/><p><strong>Como calculamos a ordem?</strong> Nota, exposição territorial e evidências definem a prioridade.</p></div>
       </section>
 
       <section className="vc-section vc-priorities" id="prioridades">
@@ -124,7 +124,6 @@ export function FinalDashboard() {
             </article>
           ))}
         </div>
-        <aside className="vc-method-note"><Icon name="info"/><div><strong>Como calculamos a ordem?</strong><p>Combinamos a nota do componente, a exposição territorial e a disponibilidade de evidências. A metodologia completa acompanha cada resultado.</p></div><button type="button">Ver metodologia</button></aside>
       </section>
     </>
   );
