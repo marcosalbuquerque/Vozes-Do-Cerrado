@@ -10,7 +10,7 @@ const configSchema = z.object({
   OPENAI_MODEL: z.string().trim().min(1).default("gpt-5.4"),
   OPENAI_MAX_OUTPUT_TOKENS: optionalPositiveInteger(2200),
   GEMINI_API_KEY: z.string().trim().optional(),
-  GEMINI_MODEL: z.string().trim().min(1).default("gemini-2.5-flash"),
+  GEMINI_MODEL: z.string().trim().min(1).default("gemini-3.6-flash"),
   ALLOWED_ORIGINS: z.string().default("http://localhost:5173"),
   SAFETY_IDENTIFIER_SECRET: z.string().min(32).optional(),
   AI_RATE_LIMIT_PER_MINUTE: optionalPositiveInteger(3),
