@@ -124,8 +124,8 @@ export function FinalDashboard() {
         </header>
         <div className="vc-priority-list">
           {finalPriorities.map((priority, index) => (
-            <article className={`vc-priority ${index === 0 ? "is-featured" : ""}`} key={priority.position}>
-              <div className={`vc-priority-index is-${priority.tone}`}><span>{priority.position}</span><i/></div>
+            <article className={`vc-priority is-${getScoreTone(priority.score)} ${index === 0 ? "is-featured" : ""}`} key={priority.position}>
+              <div className="vc-priority-index"><span>{priority.position}</span></div>
               <div className="vc-priority-main"><span className={`vc-pill is-${priority.tone}`}>{priority.level}</span><h3>{priority.component}</h3><p>{priority.reason}</p></div>
               <div className={`vc-priority-score is-${getScoreTone(priority.score)}`}><span>Nota</span><strong>{priority.score.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4</small></div>
               {priority.to ? <Link className="vc-round-link" to={priority.to} aria-label={`Ver detalhes de ${priority.component}`}><Icon name="arrow"/></Link> : <button className="vc-round-link" type="button" disabled aria-label={`${priority.component}: detalhe indisponível nesta demonstração`}><Icon name="arrow"/></button>}
