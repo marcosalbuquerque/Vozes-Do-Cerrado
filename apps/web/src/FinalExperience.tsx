@@ -177,8 +177,8 @@ export function FinalPriority() {
   return (
     <>
       <section className="vc-detail-hero">
-        <div className="vc-detail-top"><Link to="/" className="vc-back">← Voltar ao diagnóstico</Link><span className="vc-pill is-critical">Prioridade 01</span></div>
-        <div className="vc-detail-title"><div><p className="vc-kicker">Governança · gestão de riscos</p><h1>Gestão de riscos climáticos</h1><p>A avaliação não encontrou um processo estruturado de prevenção e monitoramento.</p></div><div className="vc-level"><span>Nível atual</span><strong>1</strong><small>Estágio inicial</small></div></div>
+        <div className="vc-detail-top"><Link to="/" className="vc-back">← Voltar ao diagnóstico</Link><span className="vc-detail-priority">Prioridade</span></div>
+        <div className="vc-detail-title"><div><p className="vc-kicker">Governança · gestão de riscos</p><h1>Gestão de riscos climáticos</h1><p>A avaliação não encontrou um processo estruturado de prevenção e monitoramento.</p></div><div className="vc-level"><span>Nível atual</span><strong>Estágio inicial</strong></div></div>
       </section>
 
       <section className="vc-risk-section" aria-labelledby="riscos-title">
@@ -197,7 +197,7 @@ export function FinalPriority() {
             <li><span>03</span><div><strong>Rotina de prevenção e monitoramento</strong><small>Não identificado na avaliação</small></div><i aria-label="Pendente">Pendente</i></li>
             <li className="is-done"><span><Icon name="check"/></span><div><strong>Plano de contingência publicado</strong><small>Evidência encontrada</small></div><i aria-label="Concluído">Concluído</i></li>
           </ol>
-          <article className="vc-benchmark"><span className="vc-benchmark-letter">B</span><p className="vc-kicker vc-kicker-dark">Referência comparável</p><h3>Estado X <span>· nível avançado</span></h3><p>Selecionado por semelhança regional e exposição a períodos de seca.</p><aside><Icon name="info"/><p>Comparações são orientativas. Contexto, capacidade institucional e território devem ser considerados.</p></aside><button type="button">Ver evidências da referência <Icon name="arrow"/></button></article>
+          <article className="vc-benchmark"><div className="vc-benchmark-score"><span>Nota comparável</span><strong>4,0</strong><small>de 4</small></div><p className="vc-kicker vc-kicker-dark">Referência comparável</p><h3>São Paulo <span>· estágio avançado</span></h3><p>Referência de estágio avançado no componente Gestão de riscos climáticos.</p><aside><Icon name="info"/><p>Comparações são orientativas. Contexto, capacidade institucional e território devem ser considerados.</p></aside><a href="https://climatescanner.org/pt/panorama-local-do-brasil/estados/full-evaluation/sao-paulo" target="_blank" rel="noreferrer">Ver São Paulo no Painel ClimaBrasil <Icon name="arrow"/></a></article>
         </div>
       </section>
 
