@@ -4,16 +4,15 @@ RUN corepack enable
 WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/web/package.json apps/web/package.json
+COPY frontend/package.json frontend/package.json
 RUN pnpm install --frozen-lockfile
 
-COPY apps/web apps/web
+COPY frontend frontend
 RUN pnpm --filter @vozes/web build
 
 FROM caddy:2.10-alpine
 
-COPY apps/web/Caddyfile /etc/caddy/Caddyfile
-COPY --from=build /app/apps/web/dist /srv
+COPY frontend/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/frontend/dist /srv
 
 EXPOSE 3000
-

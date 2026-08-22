@@ -61,9 +61,9 @@ No MVP, não há painel exclusivo com login para auditores. Contudo, a arquitetu
 ### 4.1 Stack de Tecnologia
 
 * **Linguagem & Monorepo:** TypeScript (modo estrito) via `pnpm workspaces`.
-* **Frontend (`apps/web`):** React, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS, Radix UI, MapLibre GL JS (mapas) e Recharts (gráficos).
-* **Backend (`apps/api`):** Node.js LTS, Express, contratos Zod/OpenAPI, Prisma ORM e PostgreSQL.
-* **Processamento Assíncrono (`apps/worker`):** BullMQ e Redis para ingestão de dados, tarefas de IA e processamento de arquivos.
+* **Frontend (`frontend`):** React, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS, Radix UI, MapLibre GL JS (mapas) e Recharts (gráficos).
+* **Backend (`backend`):** Node.js LTS, Express, contratos Zod/OpenAPI, Prisma ORM e PostgreSQL.
+* **Processamento Assíncrono (`backend/worker`):** BullMQ e Redis para ingestão de dados, tarefas de IA e processamento de arquivos.
 * **Armazenamento de Arquivos:** Railway Storage Bucket (compatível com S3) para evidências e anexos via URLs pré-assinadas.
 * **Hospedagem & Infraestrutura:** Project Railway (ambientes de `staging` e `production`).
 
@@ -71,18 +71,15 @@ No MVP, não há painel exclusivo com login para auditores. Contudo, a arquitetu
 
 ```text
 vozes-do-cerrado/
-├── apps/
-│   ├── web/                 # SPA React + Vite (Gestor e Área Pública)
-│   ├── api/                 # API REST Express (Autenticação, regras, dados)
-│   └── worker/              # BullMQ (Processamento assíncrono e serviços de IA)
+├── frontend/                # SPA React + Vite (aplicação ativa no Railway)
+├── backend/                 # API REST e processamento assíncrono futuro
 ├── packages/
 │   ├── contracts/           # Schemas Zod e DTOs compartilhados
 │   ├── database/            # Schema Prisma, migrações e seeds
 │   ├── ui/                  # Design System e componentes Radix/Tailwind
 │   ├── config/              # Configurações compartilhadas (TS, ESLint)
 │   └── observability/       # Logs estruturados e métricas
-├── docs/                    # Especificações e contratos de API
-└── plan.md
+└── docs/                    # Plano, design system, referências e entregáveis
 
 ```
 
@@ -191,7 +188,7 @@ vozes-do-cerrado/
 ### KAN-11 — Desenvolver Frontend
 
 * **Status:** A Fazer.
-* **Ações:** Configuração do Vite em `apps/web`, integração com React Router, TanStack Query, formulários com Zod, renderização de mapas via MapLibre GL JS e dashboard de indicadores do gestor e público.
+* **Ações:** Configuração do Vite em `frontend`, integração com React Router, TanStack Query, formulários com Zod, renderização de mapas via MapLibre GL JS e dashboard de indicadores do gestor e público.
 
 ### KAN-7 — Desenvolver Backend e Infraestrutura
 

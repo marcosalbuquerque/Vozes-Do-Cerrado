@@ -4,7 +4,7 @@ const path = require("node:path");
 
 const port = Number(process.env.PORT || 3000);
 const host = "0.0.0.0";
-const staticRoot = path.join(__dirname, "apps", "web", "dist");
+const staticRoot = path.join(__dirname, "frontend", "dist");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -56,4 +56,3 @@ const server = http.createServer((request, response) => {
 server.listen(port, host, () => {
   console.log(`Vozes do Cerrado disponível em http://${host}:${port}`);
 });
-
