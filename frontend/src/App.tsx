@@ -6,10 +6,12 @@ import {
   FinalPriority,
   FinalTracking,
 } from "./FinalExperience";
+import LowFidelityExperience from "./LowFidelityExperience";
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/baixa-fidelidade/*" element={<LowFidelityExperience />} />
       <Route element={<FinalLayout />}>
         <Route path="/" element={<FinalDashboard />} />
         <Route path="/prioridade/:componentId" element={<FinalPriority />} />
