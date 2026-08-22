@@ -210,7 +210,7 @@ export function FinalDashboard() {
       <section className="vc-overview" aria-label="Resumo do diagnóstico">
         <div><span className="vc-metric">{String(priorities.length).padStart(2, "0")}</span><p><strong>Componentes críticos</strong><span>Nota abaixo de 2,00</span></p></div>
         <div><span className="vc-metric">2025</span><p><strong>Ano da avaliação</strong><span>{calculable.length} componentes calculáveis</span></p></div>
-        <div className="vc-order-method"><p><strong>Como calculamos a ordem?</strong></p><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Ver critérios</button></div>
+        <div className="vc-order-method"><p><strong>Como calculamos a ordem?</strong></p><button type="button" onClick={() => setMethodOpen(true)} aria-haspopup="dialog">Saiba mais</button></div>
       </section>
 
       {methodOpen && (
