@@ -107,8 +107,7 @@ function summarizeProblem(component: ComponentScore) {
   const lowestItem = getLowestItem(component);
   if (!lowestItem) return "Não há item calculável neste componente.";
   const comment = lowestItem.assessmentComment.replace(/\s+/g, " ").trim();
-  const excerpt = comment.length > 190 ? `${comment.slice(0, 187).trimEnd()}…` : comment;
-  return excerpt || `O item “${lowestItem.itemName}” recebeu a menor classificação do componente.`;
+  return comment || `O item “${lowestItem.itemName}” recebeu a menor classificação do componente.`;
 }
 
 export function FinalLayout() {
