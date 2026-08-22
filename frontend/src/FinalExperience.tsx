@@ -199,7 +199,7 @@ export function FinalDashboard() {
           <p className="vc-kicker">Painel ClimaBrasil · avaliação 2025</p>
           <div className="vc-filter-row"><label htmlFor="state-select">Território analisado</label><div className="vc-state-select"><select id="state-select" defaultValue="DF"><option value="DF">Distrito Federal</option></select><Icon name="chevron"/></div><a href="#prioridades" className="vc-button vc-button-lime">Ver critérios <Icon name="arrow"/></a></div>
           <h1>Onde o DF precisa agir <em>primeiro?</em></h1>
-          <p className="vc-lead">As prioridades abaixo vêm diretamente da avaliação oficial. A menor nota aparece primeiro.</p>
+          <p className="vc-lead">As prioridades abaixo vêm diretamente da avaliação oficial, ranqueadas através do nosso critério de priorização.</p>
         </div>
         <div className={`vc-hero-data is-${getScoreTone(overallScore)}`}>
           <div className="vc-score-cluster"><p className={`vc-score-status is-${getScoreTone(overallScore)}`}>{getScoreStatus(overallScore)}</p><div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><span>Média dos componentes</span><strong>{formatScore(overallScore)}</strong><small>de 4 pontos</small></div></div>
