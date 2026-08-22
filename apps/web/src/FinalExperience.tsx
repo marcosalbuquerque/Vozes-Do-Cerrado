@@ -8,7 +8,7 @@ const finalPriorities = [
     position: "01",
     component: "Gestão de riscos climáticos",
     level: "Estágio inicial",
-    score: "1,2",
+    score: 1.2,
     reason: "Faltam mapeamento atualizado, responsáveis definidos e uma rotina de prevenção.",
     tone: "critical",
     to: "/prioridade/gestao-de-riscos",
@@ -17,7 +17,7 @@ const finalPriorities = [
     position: "02",
     component: "Adaptação e resiliência",
     level: "Em desenvolvimento",
-    score: "1,8",
+    score: 1.8,
     reason: "O plano existe, mas ainda não conecta metas, orçamento e responsáveis.",
     tone: "attention",
   },
@@ -25,11 +25,19 @@ const finalPriorities = [
     position: "03",
     component: "Inventário de emissões",
     level: "Em desenvolvimento",
-    score: "2,1",
+    score: 2.1,
     reason: "A última atualização está fora do período recomendado para a análise.",
     tone: "moderate",
   },
 ];
+
+const overallScore = 1.9;
+
+function getScoreTone(score: number) {
+  if (score < 2) return "critical";
+  if (score <= 3) return "attention";
+  return "positive";
+}
 
 function Icon({ name }: { name: IconName }) {
   const paths: Record<IconName, ReactNode> = {
@@ -97,7 +105,7 @@ export function FinalDashboard() {
           </div>
         </div>
         <div className="vc-hero-data">
-          <div className="vc-score-orbit"><span>Nota geral</span><strong>1,9</strong><small>de 4 pontos</small></div>
+          <div className={`vc-score-orbit is-${getScoreTone(overallScore)}`}><span>Nota geral</span><strong>{overallScore.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4 pontos</small></div>
           <EvidenceWave />
           <p><span>72%</span> dos itens avaliados têm evidência disponível</p>
         </div>
@@ -115,11 +123,11 @@ export function FinalDashboard() {
           <p>Ordenadas por nota, exposição ao risco e ausência de evidências.</p>
         </header>
         <div className="vc-priority-list">
-          {finalPriorities.map((priority) => (
-            <article className="vc-priority" key={priority.position}>
+          {finalPriorities.map((priority, index) => (
+            <article className={`vc-priority ${index === 0 ? "is-featured" : ""}`} key={priority.position}>
               <div className={`vc-priority-index is-${priority.tone}`}><span>{priority.position}</span><i/></div>
               <div className="vc-priority-main"><span className={`vc-pill is-${priority.tone}`}>{priority.level}</span><h3>{priority.component}</h3><p>{priority.reason}</p></div>
-              <div className="vc-priority-score"><span>Nota</span><strong>{priority.score}</strong><small>de 4</small></div>
+              <div className={`vc-priority-score is-${getScoreTone(priority.score)}`}><span>Nota</span><strong>{priority.score.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong><small>de 4</small></div>
               {priority.to ? <Link className="vc-round-link" to={priority.to} aria-label={`Ver detalhes de ${priority.component}`}><Icon name="arrow"/></Link> : <button className="vc-round-link" type="button" disabled aria-label={`${priority.component}: detalhe indisponível nesta demonstração`}><Icon name="arrow"/></button>}
             </article>
           ))}
