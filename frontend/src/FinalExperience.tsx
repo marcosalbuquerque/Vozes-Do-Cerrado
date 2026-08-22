@@ -432,7 +432,7 @@ export function FinalPriority() {
           <span className="vc-score-status is-critical">Contexto territorial real</span>
         </div>
         <h2 id="mapa-title">Riscos climáticos do DF</h2>
-        <p className="vc-risk-lead">Acompanhe a projeção dos dados climáticos ao longo do tempo (2020 → 2030 → 2050) a partir dos registros do AdaptaBrasil MCTI.</p>
+        <p className="vc-risk-lead">As projeções oficiais do AdaptaBrasil MCTI revelam um agravamento contínuo dos riscos climáticos no Distrito Federal até 2050. Sem medidas estruturantes de adaptação, o estresse hídrico e as ameaças territoriais atingem níveis críticos, tornando a ação pública preventiva cada vez mais urgente.</p>
         <ul>
           {riskIndicators.slice(0, 3).map((indicator, index) => {
             const first = indicator.observations[0];
