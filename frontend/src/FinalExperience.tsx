@@ -418,9 +418,7 @@ export function FinalPriority() {
         </div>
         <div className="vc-level">
           <span>Nível calculado</span>
-          <div className="vc-context-pill-wrap">
-            <span className="vc-score-status is-critical">{getComponentStage(component.score)}</span>
-          </div>
+          <strong className="vc-level-stage is-critical">{getComponentStage(component.score)}</strong>
         </div>
       </div>
     </section>
